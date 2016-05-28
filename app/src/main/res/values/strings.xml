@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Task Manager</string>
+    <string name="action_settings">Settings</string>
+    <string name="add_new_task">Додати</string>
+    <string name="saveTask">Зберегти</string>
+    <string name="exit">Вихід</string>
+    <string name="activity_no_result">Activity no return result </string>
+    <string name="title">Найменування</string>
+    <string name="description">Коментар</string>
+</resources>
