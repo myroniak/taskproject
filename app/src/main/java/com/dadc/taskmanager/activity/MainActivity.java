@@ -32,7 +32,7 @@ public class MainActivity extends AppCompatActivity {
 
         if (savedInstanceState != null) {
 
-            mTaskArrayList = (ArrayList<Task>) savedInstanceState.getSerializable(KEY_SAVE_INSTANCE);
+            mTaskArrayList =  savedInstanceState.getParcelableArrayList(KEY_SAVE_INSTANCE);
         } else {
             mTaskArrayList = new ArrayList<>();
         }
@@ -51,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
 
         if (resultCode == RESULT_OK) {
-            Task myTask = (Task) intent.getSerializableExtra(KEY_SUBMIT_TASK);
+            Task myTask = intent.getParcelableExtra(KEY_SUBMIT_TASK);
 
             // add element to position 0 in mTaskListView
             mTaskArrayList.add(0, myTask);

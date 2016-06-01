@@ -4,7 +4,9 @@
     <color name="colorPrimaryDark">#afb42b</color>
     <color name="colorAccent">#FF4081</color>
     <color name="colorGreen">#90af6a</color>
+    <color name="colorDarkGreen">#7d975c</color>
     <color name="colorRed">#c74c54</color>
+    <color name="colorDarkRed">#9c3b42</color>
     <color name="colorGrey">#727272</color>
     <color name="colorBlack">#212121</color>
     <color name="colorLightTextButton">#F0F4C3</color>
