@@ -5,7 +5,9 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.dadc.taskmanager.R;
 import com.dadc.taskmanager.adapter.TaskAdapter;
@@ -45,6 +47,33 @@ public class MainActivity extends AppCompatActivity {
         mTaskListView = (ListView) findViewById(R.id.listViewTask);
         mTaskAdapter = new TaskAdapter(this, mTaskArrayList);
         mTaskListView.setAdapter(mTaskAdapter);
+
+        mTaskListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> av, View v, int pos, long id) {
+                Toast toast = Toast.makeText(getApplicationContext(),
+                        "Click!", Toast.LENGTH_SHORT);
+                toast.show();
+
+            }
+        });
+
+        mTaskListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(final AdapterView<?> p, View v, final int position, long id) {
+
+                Task title = mTaskAdapter.getItem(position);
+                Intent intent = new Intent(MainActivity.this, NewTaskActivity.class);
+                intent.putExtra("taskEdit", title);
+                intent.putExtra("position", position);
+                startActivityForResult(intent, 1);
+
+                return true;
+            }
+        });
+
+
+
     }
 
     @Override
@@ -52,9 +81,18 @@ public class MainActivity extends AppCompatActivity {
 
         if (resultCode == RESULT_OK) {
             Task myTask = intent.getParcelableExtra(KEY_SUBMIT_TASK);
+            int position = intent.getIntExtra("pos", -1);
 
-            // add element to position 0 in mTaskListView
-            mTaskArrayList.add(0, myTask);
+            if (position > -1) {
+                // update item listView
+                mTaskArrayList.set(position, myTask);
+            } else {
+
+                // add element to position 0 in mTaskListView
+
+                mTaskArrayList.add(0, myTask);
+
+            }
             mTaskAdapter.notifyDataSetChanged();
 
         }
@@ -64,7 +102,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
-        savedInstanceState.putSerializable(KEY_SAVE_INSTANCE, mTaskArrayList);
+        savedInstanceState.putParcelableArrayList(KEY_SAVE_INSTANCE, mTaskArrayList);
     }
 
     // transition to  NewTaskActivity for new Task

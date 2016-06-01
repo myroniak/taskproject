@@ -18,6 +18,7 @@ public class NewTaskActivity extends AppCompatActivity {
     private static final String KEY_SUBMIT_TASK = "submit_task";
 
     private EditText mEditTextTitle, mEditTextDescription;
+    private int position;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,9 +28,17 @@ public class NewTaskActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbarNewTask);
         setSupportActionBar(toolbar);
 
-
         mEditTextTitle = (EditText) findViewById(R.id.titleEditText);
         mEditTextDescription = (EditText) findViewById(R.id.descriptionEditText);
+
+        // get data from intent for edit item content
+        Task taskEdit = getIntent().getParcelableExtra("taskEdit");
+        position = getIntent().getIntExtra("position", -1);
+
+        if (taskEdit != null) {
+            mEditTextTitle.setText(taskEdit.getTitle());
+            mEditTextDescription.setText(taskEdit.getDescription());
+        }
 
     }
 
@@ -42,6 +51,11 @@ public class NewTaskActivity extends AppCompatActivity {
         Task mTask = new Task(mTitle, mDescription);
         Intent intent = new Intent();
         intent.putExtra(KEY_SUBMIT_TASK, mTask);
+
+
+        if (position >= 0) {
+            intent.putExtra("pos", position);
+        }
         setResult(RESULT_OK, intent);
         finish();
 
