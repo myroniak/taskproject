@@ -21,7 +21,9 @@
         </activity>
 
         <activity
-            android:name=".activity.NewTaskActivity">
+            android:label="@string/create_name"
+            android:name=".activity.NewTaskActivity"
+            android:theme="@style/AppTheme.NoActionBar">
         </activity>
     </application>
 

@@ -6,7 +6,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import com.dadc.taskmanager.R;
 import com.dadc.taskmanager.adapter.TaskAdapter;
@@ -53,11 +52,11 @@ public class MainActivity extends AppCompatActivity {
 
         if (resultCode == RESULT_OK) {
             Task myTask = (Task) intent.getSerializableExtra(KEY_SUBMIT_TASK);
-            mTaskArrayList.add(myTask);
+
+            // add element to position 0 in mTaskListView
+            mTaskArrayList.add(0, myTask);
             mTaskAdapter.notifyDataSetChanged();
 
-        } else {
-            Toast.makeText(this, getString(R.string.activity_no_result), Toast.LENGTH_SHORT).show();
         }
 
     }

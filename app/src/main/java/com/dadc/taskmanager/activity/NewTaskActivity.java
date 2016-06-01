@@ -3,6 +3,7 @@ package com.dadc.taskmanager.activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.EditText;
 
@@ -22,6 +23,10 @@ public class NewTaskActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.create_task_activity);
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbarNewTask);
+        setSupportActionBar(toolbar);
+
 
         mEditTextTitle = (EditText) findViewById(R.id.titleEditText);
         mEditTextDescription = (EditText) findViewById(R.id.descriptionEditText);
