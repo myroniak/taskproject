@@ -44,6 +44,7 @@ public class TaskAdapter extends BaseAdapter {
     static class ViewHolder {
         TextView mTextViewTitle;
         TextView mTextViewDescription;
+        TextView mTextViewTime;
     }
 
     public View getView(int position, View convertView, ViewGroup parent) {
@@ -58,16 +59,25 @@ public class TaskAdapter extends BaseAdapter {
             viewHolder = new ViewHolder();
             viewHolder.mTextViewTitle = (TextView) convertView.findViewById(R.id.textViewTaskTitle);
             viewHolder.mTextViewDescription = (TextView) convertView.findViewById(R.id.textViewTaskDescription);
+            viewHolder.mTextViewTime = (TextView) convertView.findViewById(R.id.textViewTaskTime);
+
             convertView.setTag(viewHolder);
 
         } else {
 
             viewHolder = (ViewHolder) convertView.getTag();
         }
-
         viewHolder.mTextViewTitle.setText(getItem(position).getTitle());
         viewHolder.mTextViewDescription.setText(getItem(position).getDescription());
 
+        viewHolder.mTextViewTime.setVisibility(View.GONE);
+        viewHolder.mTextViewTime.setText(getItem(position).getFullDate());
+
+        if (_mTask.get(position).isSelected()) {
+            viewHolder.mTextViewTime.setVisibility(View.VISIBLE);
+        } else {
+            viewHolder.mTextViewTime.setVisibility(View.GONE);
+        }
         return convertView;
     }
 

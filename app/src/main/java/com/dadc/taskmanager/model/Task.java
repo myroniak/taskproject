@@ -8,8 +8,14 @@ import android.os.Parcelable;
  */
 public class Task implements Parcelable {
 
+
     private String mTitle;
     private String mDescription;
+    private String mFullDate;
+
+    long mStartTask;
+    private boolean isSelected;
+
 
     public Task(String mTitle, String mDescription) {
 
@@ -18,10 +24,38 @@ public class Task implements Parcelable {
 
     }
 
-    protected Task(Parcel in) {
-        mTitle = in.readString();
-        mDescription = in.readString();
+    public String getTitle() {
+        return mTitle;
     }
+
+    public String getDescription() {
+        return mDescription;
+    }
+
+    public String getFullDate() {
+        return mFullDate;
+    }
+
+    public void setFullDate(String time) {
+        mFullDate = time;
+    }
+
+    public long getStartTask() {
+        return mStartTask;
+    }
+
+    public void setStartTask(long startTask) {
+        mStartTask = startTask;
+    }
+
+    public boolean isSelected() {
+        return isSelected;
+    }
+
+    public void setSelected(boolean isSelected) {
+        this.isSelected = isSelected;
+    }
+
 
     public static final Creator<Task> CREATOR = new Creator<Task>() {
         @Override
@@ -35,12 +69,9 @@ public class Task implements Parcelable {
         }
     };
 
-    public String getTitle() {
-        return mTitle;
-    }
-
-    public String getDescription() {
-        return mDescription;
+    protected Task(Parcel in) {
+        mTitle = in.readString();
+        mDescription = in.readString();
     }
 
     @Override
