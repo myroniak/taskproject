@@ -1,13 +1,17 @@
 package com.dadc.taskmanager.activity;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -15,6 +19,7 @@ import android.widget.ListView;
 import com.dadc.taskmanager.R;
 import com.dadc.taskmanager.adapter.TaskAdapter;
 import com.dadc.taskmanager.model.Task;
+import com.dadc.taskmanager.util.SaveData;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -28,7 +33,11 @@ public class MainActivity extends AppCompatActivity {
     private static final String KEY_POSITION_ITEM = "position_item";
     private static final String KEY_EDIT_ITEM = "edit_item";
 
-    private ArrayList<Task> mTaskArrayList;
+    SharedPreferences.Editor editor;
+    public static final String APP_PREFERENCES = "setting";
+    SharedPreferences mSettings;
+
+    private ArrayList<Task> mTaskArrayList = new ArrayList<>();
     private TaskAdapter mTaskAdapter;
     private ListView mTaskListView;
 
@@ -53,16 +62,60 @@ public class MainActivity extends AppCompatActivity {
         initUI();
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_add_items:
+                if (mTaskArrayList.isEmpty()) {
+
+                    mTaskArrayList.add(0, new Task(getResources().getString(R.string.titleTask), getResources().getString(R.string.descriptionTask), R.color.defaultTaskDate,""));
+                    addManyTasks();
+                } else {
+
+                    addManyTasks();
+                }
+                // Save data SharedPreferences
+                SaveData.saveSetting(MainActivity.this, mTaskArrayList, mSettings, APP_PREFERENCES, editor);
+
+                return true;
+            case R.id.action_delete_items:
+                mTaskArrayList.clear();
+                SaveData.clearData(editor);
+
+                mTaskAdapter.notifyDataSetChanged();
+                return true;
+            default:
+                return true;
+        }
+    }
+
+
     // initialize widget and adapter
     public void initUI() {
+
+
+        mSettings = getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE);
+        editor = mSettings.edit();
+        // LoadData SharedPreferences
+        mTaskArrayList = SaveData.loadSetting(mTaskArrayList, mSettings);
+
         mRelativeLayoutMainActivity = (CoordinatorLayout) findViewById(R.id.relativeLayoutMainActivity);
         mTaskListView = (ListView) findViewById(R.id.listViewTask);
         mTaskAdapter = new TaskAdapter(this, mTaskArrayList);
         mTaskListView.setAdapter(mTaskAdapter);
 
+
         mTaskListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> av, final View v, final int position, long id) {
+                final Task mTask = mTaskAdapter.getItem(position);
 
 
                 //get start time on current item
@@ -71,12 +124,13 @@ public class MainActivity extends AppCompatActivity {
                 mTaskAdapter.getItem(position).setStartTask(startTimeTask());
 
                 if (_mStartTime == 0) {
-
+                    mTask.setTaskColor(R.color.startTaskDate);
                     mTaskArrayList.get(position).setSelected(true);
                     //set date to TextView after start
                     mTaskAdapter.getItem(position).setFullDate(newDateTask(mTaskAdapter.getItem(position).getStartTask()));
 
                 } else if (_mStartTime > 0 && mTaskAdapter.getItem(position).getFullDate().contains("*")) {
+                    mTask.setTaskColor(R.color.stopTaskTime);
 
                     mTaskArrayList.get(position).setSelected(true);
 
@@ -92,6 +146,7 @@ public class MainActivity extends AppCompatActivity {
                         public void onClick(DialogInterface dialog, int arg1) {
                             mTaskArrayList.get(position).setSelected(true);
                             //set start time
+                            mTask.setTaskColor(R.color.startTaskDate);
                             mTaskAdapter.getItem(position).setStartTask(startTimeTask());
                             mTaskAdapter.getItem(position).setFullDate(newDateTask(mTaskAdapter.getItem(position).getStartTask()));
                         }
@@ -104,7 +159,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        //edit Task
+        //Edit Task
         mTaskListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(final AdapterView<?> p, View v, final int position, long id) {
@@ -125,13 +180,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public String newDateTask(long mTimeStart) {
-        //format date
+
+        //Format date
         DateFormat mDateFormat = new SimpleDateFormat(getResources().getString(R.string.fullFormat));
 
-        //generate String for TextView
+        //Generate String for TextView
         String mNewDateTask = mDateFormat.format(mTimeStart) + getResources().getString(R.string.hyphen) + getResources().getString(R.string.noSetDate);
 
-        //show state DateTask
+        //Show state DateTask
         Snackbar.make(mRelativeLayoutMainActivity, getResources().getString(R.string.titleStartTaskSnackBar), Snackbar.LENGTH_LONG).show();
         mTaskAdapter.notifyDataSetChanged();
         return mNewDateTask;
@@ -142,19 +198,49 @@ public class MainActivity extends AppCompatActivity {
         long mTimeEnd = System.currentTimeMillis();
         long mTimeComplete = mTimeEnd - mTimeStart;
 
-        //format date
+        //Format date
         DateFormat mDateFormatFull = new SimpleDateFormat(getResources().getString(R.string.fullFormat));
         DateFormat mDateFormatShort = new SimpleDateFormat(getResources().getString(R.string.shortFormat));
         mDateFormatShort.setTimeZone(TimeZone.getTimeZone(getResources().getString(R.string.timeZone)));
 
-        //generate String for TextView
+        //Generate String for TextView
         String mEndDateTask = mDateFormatFull.format(mTimeStart) + getResources().getString(R.string.hyphen) + mDateFormatFull.format(mTimeEnd) + getResources().getString(R.string.spaceValue) + mDateFormatShort.format(mTimeComplete);
 
-        //show state DateTask
+        //Show state DateTask
         Snackbar.make(mRelativeLayoutMainActivity, getResources().getString(R.string.titleEndTaskSnackBar), Snackbar.LENGTH_SHORT).show();
         mTaskAdapter.notifyDataSetChanged();
+        //Save data SharedPreferences
+        SaveData.saveSetting(MainActivity.this, mTaskArrayList, mSettings, APP_PREFERENCES, editor);
 
         return mEndDateTask;
+    }
+
+
+    public void addManyTasks() {
+
+        float o = getTotalHeightListView(mTaskListView, mTaskAdapter);
+        float y = mTaskListView.getHeight();
+        int k = ((int) (y / o) - 1) * 3;
+
+        for (int i = 0; i < k; i++) {
+            mTaskArrayList.add(0, new Task(getResources().getString(R.string.titleTask), getResources().getString(R.string.descriptionTask), R.color.defaultTaskDate, ""));
+        }
+        mTaskAdapter.notifyDataSetChanged();
+
+    }
+
+
+    private int getTotalHeightListView(ListView lv, TaskAdapter mAdapter) {
+
+        int listViewElementsHeight = 0;
+        for (int i = 0; i < mAdapter.getCount(); i++) {
+            View mView = mAdapter.getView(i, null, lv);
+            mView.measure(
+                    View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
+                    View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
+            listViewElementsHeight += mView.getMeasuredHeight();
+        }
+        return listViewElementsHeight;
     }
 
     @Override
@@ -165,14 +251,18 @@ public class MainActivity extends AppCompatActivity {
             int position = intent.getIntExtra(KEY_POSITION_ITEM, -1);
 
             if (position > -1) {
-                // update item listView
+                // Update item listView
                 mTaskArrayList.set(position, myTask);
             } else {
-                // add element to position 0 in mTaskListView
+                // Add element to position 0 in mTaskListView
                 mTaskArrayList.add(0, myTask);
 
             }
+
             mTaskAdapter.notifyDataSetChanged();
+
+            // Save data SharedPreferences
+            SaveData.saveSetting(MainActivity.this, mTaskArrayList, mSettings, APP_PREFERENCES, editor);
 
         }
 

@@ -46,10 +46,10 @@ public class NewTaskActivity extends AppCompatActivity {
         String mTitle = mEditTextTitle.getText().toString();
         String mDescription = mEditTextDescription.getText().toString();
 
-        Task mTask = new Task(mTitle, mDescription);
+        Task mTask = new Task(mTitle, mDescription, R.color.defaultTaskDate,"");
+
         Intent intent = new Intent();
         intent.putExtra(KEY_SUBMIT_TASK, mTask);
-
 
         if (position >= 0) {
             intent.putExtra(KEY_POSITION_ITEM, position);
