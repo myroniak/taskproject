@@ -75,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
             case R.id.action_add_items:
                 if (mTaskArrayList.isEmpty()) {
 
-                    mTaskArrayList.add(0, new Task(getResources().getString(R.string.titleTask), getResources().getString(R.string.descriptionTask), R.color.defaultTaskDate,""));
+                    mTaskArrayList.add(0, new Task(getResources().getString(R.string.titleTask), getResources().getString(R.string.descriptionTask), R.color.defaultTaskDate, ""));
                     addManyTasks();
                 } else {
 
@@ -218,9 +218,9 @@ public class MainActivity extends AppCompatActivity {
 
     public void addManyTasks() {
 
-        float o = getTotalHeightListView(mTaskListView, mTaskAdapter);
+        float o = getHeightItemListView(mTaskListView, mTaskAdapter);
         float y = mTaskListView.getHeight();
-        int k = ((int) (y / o) - 1) * 3;
+        int k = ((int) (y / o) * 3) - 1;
 
         for (int i = 0; i < k; i++) {
             mTaskArrayList.add(0, new Task(getResources().getString(R.string.titleTask), getResources().getString(R.string.descriptionTask), R.color.defaultTaskDate, ""));
@@ -229,18 +229,14 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    private int getHeightItemListView(ListView listView, TaskAdapter listAdapter) {
 
-    private int getTotalHeightListView(ListView lv, TaskAdapter mAdapter) {
+        int heightItem = 0;//it is the ListView Height
+        View listItem = listAdapter.getView(0, null, listView);
+        listItem.measure(0, 0);
+        heightItem = listItem.getMeasuredHeight() + listView.getDividerHeight();//item height
 
-        int listViewElementsHeight = 0;
-        for (int i = 0; i < mAdapter.getCount(); i++) {
-            View mView = mAdapter.getView(i, null, lv);
-            mView.measure(
-                    View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
-                    View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
-            listViewElementsHeight += mView.getMeasuredHeight();
-        }
-        return listViewElementsHeight;
+        return heightItem;
     }
 
     @Override
