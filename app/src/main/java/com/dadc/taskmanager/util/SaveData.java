@@ -31,17 +31,15 @@ public class SaveData {
         }
     }
 
-    public static ArrayList<Task> loadSetting(ArrayList<Task> mTaskArrayList, android.content.SharedPreferences mSettings) {
+    public static ArrayList<Task> loadSetting( android.content.SharedPreferences mSettings) {
+        ArrayList<Task>  mTaskArrayList = new ArrayList<>();
         if (mSettings.contains(KEY_SETTING)) {
             JSONParser mTaskJSON = new JSONParser();
             try {
-                mTaskArrayList = mTaskJSON.loadTask(mSettings.getString(KEY_SETTING, ""));
+                  mTaskArrayList = mTaskJSON.loadTask(mSettings.getString(KEY_SETTING, ""));
             } catch (IOException | JSONException e) {
                 e.printStackTrace();
             }
-        } else {
-
-            mTaskArrayList = new ArrayList<>();
         }
         return mTaskArrayList;
 

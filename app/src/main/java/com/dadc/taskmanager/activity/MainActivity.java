@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
@@ -103,14 +104,42 @@ public class MainActivity extends AppCompatActivity {
 
         mSettings = getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE);
         editor = mSettings.edit();
-        // LoadData SharedPreferences
-        mTaskArrayList = SaveData.loadSetting(mTaskArrayList, mSettings);
+        mTaskArrayList = new ArrayList<>();
+
+
+    //  mTaskArrayList = SaveData.loadSetting( mSettings);
+       //Log.d("myLog", "logn: " + mTaskAdapter.getCount());
+
 
         mRelativeLayoutMainActivity = (CoordinatorLayout) findViewById(R.id.relativeLayoutMainActivity);
         mTaskListView = (ListView) findViewById(R.id.listViewTask);
         mTaskAdapter = new TaskAdapter(this, mTaskArrayList);
         mTaskListView.setAdapter(mTaskAdapter);
 
+        // LoadData from SharedPreferences in Thread
+        Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+
+                mTaskArrayList = SaveData.loadSetting(mSettings);
+                mTaskAdapter = new TaskAdapter(MainActivity.this, mTaskArrayList);
+                mTaskListView.setAdapter(mTaskAdapter);
+
+            }
+        }, 2000);
+
+     /*   new Thread(new Runnable() {
+            public void run() {
+                //do time consuming operations
+                mTaskArrayList = SaveData.loadSetting( mSettings);
+
+                mTaskAdapter = new TaskAdapter(MainActivity.this, mTaskArrayList);
+                mTaskListView.setAdapter(mTaskAdapter);
+               //mTaskAdapter.notifyDataSetChanged();
+                Log.d("myLog", "logUn: " + SaveData.loadSetting( mSettings).size());
+            }
+        }).start();*/
 
         mTaskListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
