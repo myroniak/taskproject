@@ -14,25 +14,26 @@ public class Task implements Parcelable {
 
     private String mTitle;
     private String mDescription;
-    private String mFullDate;
-    private int mTaskColor;
 
     private static final String KEY_TITLE = "title";
     private static final String KEY_DESCRIPTION = "description";
     private static final String KEY_COLOR = "color";
     private static final String KEY_SELECTED = "selected";
-    private static final String KEY_DATE = "date";
+    private static final String KEY_START_TIME_TASK = "start_task";
+    private static final String KEY_STOP_TIME_TASK = "stop_task";
 
-
-    long mStartTask;
+    private long mStartTimeTask;
+    private long mStopTimeTask;
+    private int mTaskColor;
     private boolean isSelected;
 
 
-    public Task(String mTitle, String mDescription, int mTaskColor, String mFullDate) {
+    public Task(String mTitle, String mDescription, int mTaskColor, long mStartTimeTask, long mStopTimeTask) {
         this.mTitle = mTitle;
         this.mDescription = mDescription;
         this.mTaskColor = mTaskColor;
-        this.mFullDate=mFullDate;
+        this.mStartTimeTask = mStartTimeTask;
+        this.mStopTimeTask = mStopTimeTask;
     }
 
     public String getTitle() {
@@ -43,20 +44,20 @@ public class Task implements Parcelable {
         return mDescription;
     }
 
-    public String getFullDate() {
-        return mFullDate;
+    public long getStartTimeTask() {
+        return mStartTimeTask;
     }
 
-    public void setFullDate(String time) {
-        mFullDate = time;
+    public void setStartTimeTask(long startTimeTask) {
+        mStartTimeTask = startTimeTask;
     }
 
-    public long getStartTask() {
-        return mStartTask;
+    public long getStopTimeTask() {
+        return mStopTimeTask;
     }
 
-    public void setStartTask(long startTask) {
-        mStartTask = startTask;
+    public void setStopTimeTask(long stopTimeTask) {
+        mStopTimeTask = stopTimeTask;
     }
 
     public boolean isSelected() {
@@ -68,7 +69,6 @@ public class Task implements Parcelable {
     }
 
     public int getTaskColor() {
-
         return mTaskColor;
     }
 
@@ -92,6 +92,9 @@ public class Task implements Parcelable {
     protected Task(Parcel in) {
         mTitle = in.readString();
         mDescription = in.readString();
+        mTaskColor = in.readInt();
+        mStartTimeTask = in.readLong();
+        mStopTimeTask = in.readLong();
     }
 
     @Override
@@ -103,6 +106,9 @@ public class Task implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(mTitle);
         dest.writeString(mDescription);
+        dest.writeInt(mTaskColor);
+        dest.writeLong(mStartTimeTask);
+        dest.writeLong(mStopTimeTask);
     }
 
     public JSONObject toJson() throws JSONException {
@@ -113,8 +119,9 @@ public class Task implements Parcelable {
             jsonObject.put(KEY_TITLE, mTitle);
             jsonObject.put(KEY_DESCRIPTION, mDescription);
             jsonObject.put(KEY_COLOR, mTaskColor);
-            jsonObject.put(KEY_SELECTED,isSelected);
-            jsonObject.put(KEY_DATE, mFullDate);
+            jsonObject.put(KEY_START_TIME_TASK, mStartTimeTask);
+            jsonObject.put(KEY_STOP_TIME_TASK, mStopTimeTask);
+            jsonObject.put(KEY_SELECTED, isSelected);
 
             return jsonObject;
 
@@ -129,8 +136,9 @@ public class Task implements Parcelable {
         mTitle = jsonObject.getString(KEY_TITLE);
         mDescription = jsonObject.getString(KEY_DESCRIPTION);
         mTaskColor = jsonObject.getInt(KEY_COLOR);
+        mStartTimeTask = jsonObject.getLong(KEY_START_TIME_TASK);
+        mStopTimeTask = jsonObject.getLong(KEY_STOP_TIME_TASK);
         isSelected = jsonObject.getBoolean(KEY_SELECTED);
-        mFullDate = jsonObject.getString(KEY_DATE);
     }
 
 }

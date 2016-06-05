@@ -22,10 +22,7 @@ import com.dadc.taskmanager.adapter.TaskAdapter;
 import com.dadc.taskmanager.model.Task;
 import com.dadc.taskmanager.util.SaveData;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.TimeZone;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -76,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
             case R.id.action_add_items:
                 if (mTaskArrayList.isEmpty()) {
 
-                    mTaskArrayList.add(0, new Task(getResources().getString(R.string.titleTask), getResources().getString(R.string.descriptionTask), R.color.defaultTaskDate, ""));
+                    mTaskArrayList.add(0, new Task(getResources().getString(R.string.titleTask), getResources().getString(R.string.descriptionTask), R.color.defaultTaskDate, 0, 0));
                     addManyTasks();
                 } else {
 
@@ -97,19 +94,12 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
     // initialize widget and adapter
     public void initUI() {
-
 
         mSettings = getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE);
         editor = mSettings.edit();
         mTaskArrayList = new ArrayList<>();
-
-
-    //  mTaskArrayList = SaveData.loadSetting( mSettings);
-       //Log.d("myLog", "logn: " + mTaskAdapter.getCount());
-
 
         mRelativeLayoutMainActivity = (CoordinatorLayout) findViewById(R.id.relativeLayoutMainActivity);
         mTaskListView = (ListView) findViewById(R.id.listViewTask);
@@ -127,44 +117,33 @@ public class MainActivity extends AppCompatActivity {
                 mTaskListView.setAdapter(mTaskAdapter);
 
             }
-        }, 2000);
-
-     /*   new Thread(new Runnable() {
-            public void run() {
-                //do time consuming operations
-                mTaskArrayList = SaveData.loadSetting( mSettings);
-
-                mTaskAdapter = new TaskAdapter(MainActivity.this, mTaskArrayList);
-                mTaskListView.setAdapter(mTaskAdapter);
-               //mTaskAdapter.notifyDataSetChanged();
-                Log.d("myLog", "logUn: " + SaveData.loadSetting( mSettings).size());
-            }
-        }).start();*/
+        }, 500);
 
         mTaskListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> av, final View v, final int position, long id) {
                 final Task mTask = mTaskAdapter.getItem(position);
 
-
                 //get start time on current item
-                long _mStartTime = mTaskAdapter.getItem(position).getStartTask();
+                long _mStartTime = mTaskAdapter.getItem(position).getStartTimeTask();
+                long _mStopTime = mTaskAdapter.getItem(position).getStopTimeTask();
                 //set start time
-                mTaskAdapter.getItem(position).setStartTask(startTimeTask());
+                //mTaskAdapter.getItem(position).setStartTimeTask(startTimeTask());
 
-                if (_mStartTime == 0) {
+                if (_mStartTime == 0 && _mStopTime == 0) {
                     mTask.setTaskColor(R.color.startTaskDate);
                     mTaskArrayList.get(position).setSelected(true);
                     //set date to TextView after start
-                    mTaskAdapter.getItem(position).setFullDate(newDateTask(mTaskAdapter.getItem(position).getStartTask()));
+                    mTask.setStartTimeTask(startTimeTask());
+                    mTaskAdapter.notifyDataSetChanged();
 
-                } else if (_mStartTime > 0 && mTaskAdapter.getItem(position).getFullDate().contains("*")) {
+                } else if (_mStopTime == 0) {
                     mTask.setTaskColor(R.color.stopTaskTime);
-
                     mTaskArrayList.get(position).setSelected(true);
 
                     //set date to TextView after end
-                    mTaskAdapter.getItem(position).setFullDate(endDateTask(_mStartTime));
+                    mTask.setStopTimeTask(stopTimeTask());
+                    mTaskAdapter.notifyDataSetChanged();
 
                 } else {
                     // reload newDateTask
@@ -176,8 +155,9 @@ public class MainActivity extends AppCompatActivity {
                             mTaskArrayList.get(position).setSelected(true);
                             //set start time
                             mTask.setTaskColor(R.color.startTaskDate);
-                            mTaskAdapter.getItem(position).setStartTask(startTimeTask());
-                            mTaskAdapter.getItem(position).setFullDate(newDateTask(mTaskAdapter.getItem(position).getStartTask()));
+                            mTaskAdapter.getItem(position).setStartTimeTask(startTimeTask());
+                            mTaskAdapter.getItem(position).setStopTimeTask(0);
+                            //  mTaskAdapter.getItem(position).setFullDate(newDateTask(mTaskAdapter.getItem(position).setStartTimeTask()));
                         }
                     });
                     mAlertDialogReloadDateTask.setNegativeButton(getResources().getString(R.string.negBtnAlertDialog), null);
@@ -205,35 +185,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public long startTimeTask() {
+
+        Snackbar.make(mRelativeLayoutMainActivity, getResources().getString(R.string.titleStartTaskSnackBar), Snackbar.LENGTH_LONG).show();
+        mTaskAdapter.notifyDataSetChanged();
+        SaveData.saveSetting(MainActivity.this, mTaskArrayList, mSettings, APP_PREFERENCES, editor);
+
         return System.currentTimeMillis();
     }
 
-    public String newDateTask(long mTimeStart) {
-
-        //Format date
-        DateFormat mDateFormat = new SimpleDateFormat(getResources().getString(R.string.fullFormat));
-
-        //Generate String for TextView
-        String mNewDateTask = mDateFormat.format(mTimeStart) + getResources().getString(R.string.hyphen) + getResources().getString(R.string.noSetDate);
-
-        //Show state DateTask
-        Snackbar.make(mRelativeLayoutMainActivity, getResources().getString(R.string.titleStartTaskSnackBar), Snackbar.LENGTH_LONG).show();
-        mTaskAdapter.notifyDataSetChanged();
-        return mNewDateTask;
-    }
-
-    public String endDateTask(long mTimeStart) {
-
-        long mTimeEnd = System.currentTimeMillis();
-        long mTimeComplete = mTimeEnd - mTimeStart;
-
-        //Format date
-        DateFormat mDateFormatFull = new SimpleDateFormat(getResources().getString(R.string.fullFormat));
-        DateFormat mDateFormatShort = new SimpleDateFormat(getResources().getString(R.string.shortFormat));
-        mDateFormatShort.setTimeZone(TimeZone.getTimeZone(getResources().getString(R.string.timeZone)));
-
-        //Generate String for TextView
-        String mEndDateTask = mDateFormatFull.format(mTimeStart) + getResources().getString(R.string.hyphen) + mDateFormatFull.format(mTimeEnd) + getResources().getString(R.string.spaceValue) + mDateFormatShort.format(mTimeComplete);
+    public long stopTimeTask() {
 
         //Show state DateTask
         Snackbar.make(mRelativeLayoutMainActivity, getResources().getString(R.string.titleEndTaskSnackBar), Snackbar.LENGTH_SHORT).show();
@@ -241,7 +201,7 @@ public class MainActivity extends AppCompatActivity {
         //Save data SharedPreferences
         SaveData.saveSetting(MainActivity.this, mTaskArrayList, mSettings, APP_PREFERENCES, editor);
 
-        return mEndDateTask;
+        return System.currentTimeMillis();
     }
 
 
@@ -252,7 +212,7 @@ public class MainActivity extends AppCompatActivity {
         int k = ((int) (y / o) * 3) - 1;
 
         for (int i = 0; i < k; i++) {
-            mTaskArrayList.add(0, new Task(getResources().getString(R.string.titleTask), getResources().getString(R.string.descriptionTask), R.color.defaultTaskDate, ""));
+            mTaskArrayList.add(0, new Task(getResources().getString(R.string.titleTask), getResources().getString(R.string.descriptionTask), R.color.defaultTaskDate, 0, 0));
         }
         mTaskAdapter.notifyDataSetChanged();
 
@@ -287,7 +247,7 @@ public class MainActivity extends AppCompatActivity {
             mTaskAdapter.notifyDataSetChanged();
 
             // Save data SharedPreferences
-            SaveData.saveSetting(MainActivity.this, mTaskArrayList, mSettings, APP_PREFERENCES, editor);
+            SaveData.saveSetting(this, mTaskArrayList, mSettings, APP_PREFERENCES, editor);
 
         }
 
@@ -306,4 +266,3 @@ public class MainActivity extends AppCompatActivity {
         startActivityForResult(intent, 1);
     }
 }
-

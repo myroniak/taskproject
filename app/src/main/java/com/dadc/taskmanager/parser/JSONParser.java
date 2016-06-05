@@ -19,6 +19,7 @@ public class JSONParser {
         for (Task task : tasks) {
             jsonArray.put(task.toJson());
         }
+
         return jsonArray.toString();
     }
 

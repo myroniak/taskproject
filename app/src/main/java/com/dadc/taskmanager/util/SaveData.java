@@ -16,7 +16,7 @@ import java.util.ArrayList;
  */
 public class SaveData {
 
-    private static final String KEY_SETTING = "key";
+    private static final String KEY_VALUE = "key";
 
     public static void saveSetting(Context context, ArrayList<Task> mTaskArrayList, android.content.SharedPreferences mSettings, String keySetting, android.content.SharedPreferences.Editor editor) {
         mSettings = context.getSharedPreferences(keySetting, Context.MODE_PRIVATE);
@@ -24,19 +24,20 @@ public class SaveData {
         editor = mSettings.edit();
 
         try {
-            editor.putString(KEY_SETTING, mTaskJSON.saveTask(mTaskArrayList));
+            editor.putString(KEY_VALUE, mTaskJSON.saveTask(mTaskArrayList));
             editor.apply();
         } catch (JSONException | IOException e) {
             e.printStackTrace();
         }
+
     }
 
-    public static ArrayList<Task> loadSetting( android.content.SharedPreferences mSettings) {
-        ArrayList<Task>  mTaskArrayList = new ArrayList<>();
-        if (mSettings.contains(KEY_SETTING)) {
+    public static ArrayList<Task> loadSetting(android.content.SharedPreferences mSettings) {
+        ArrayList<Task> mTaskArrayList = new ArrayList<>();
+        if (mSettings.contains(KEY_VALUE)) {
             JSONParser mTaskJSON = new JSONParser();
             try {
-                  mTaskArrayList = mTaskJSON.loadTask(mSettings.getString(KEY_SETTING, ""));
+                mTaskArrayList = mTaskJSON.loadTask(mSettings.getString(KEY_VALUE, ""));
             } catch (IOException | JSONException e) {
                 e.printStackTrace();
             }
@@ -47,7 +48,7 @@ public class SaveData {
 
     public static void clearData(android.content.SharedPreferences.Editor editor) {
 
-        editor.remove(KEY_SETTING);
+        editor.remove(KEY_VALUE);
         editor.clear();
         editor.commit();
 

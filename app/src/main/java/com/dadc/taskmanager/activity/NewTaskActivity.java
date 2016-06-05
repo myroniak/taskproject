@@ -46,7 +46,7 @@ public class NewTaskActivity extends AppCompatActivity {
         String mTitle = mEditTextTitle.getText().toString();
         String mDescription = mEditTextDescription.getText().toString();
 
-        Task mTask = new Task(mTitle, mDescription, R.color.defaultTaskDate,"");
+        Task mTask = new Task(mTitle, mDescription, R.color.defaultTaskDate, 0, 0);
 
         Intent intent = new Intent();
         intent.putExtra(KEY_SUBMIT_TASK, mTask);

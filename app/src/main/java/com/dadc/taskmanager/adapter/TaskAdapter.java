@@ -5,6 +5,7 @@ package com.dadc.taskmanager.adapter;
  */
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,26 +15,32 @@ import android.widget.TextView;
 import com.dadc.taskmanager.R;
 import com.dadc.taskmanager.model.Task;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.TimeZone;
 
 
 public class TaskAdapter extends BaseAdapter {
     Context _mContext;
-    ArrayList<Task> _mTask;
+    ArrayList<Task> _mTaskArrayList;
+    DateFormat mDateFormatFull, mDateFormatShort;
+    String mStartTime, mStopTime, mElapsedTime;
+    Resources mResources;
 
     public TaskAdapter(Context context, ArrayList<Task> mTaskArrayList) {
         _mContext = context;
-        _mTask = mTaskArrayList;
+        _mTaskArrayList = mTaskArrayList;
     }
 
     @Override
     public int getCount() {
-        return _mTask.size();
+        return _mTaskArrayList.size();
     }
 
     @Override
     public Task getItem(int position) {
-        return _mTask.get(position);
+        return _mTaskArrayList.get(position);
     }
 
     @Override
@@ -50,12 +57,19 @@ public class TaskAdapter extends BaseAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
 
         ViewHolder viewHolder;
-
+        Task mTask = getItem(position);
         if (convertView == null) {
             LayoutInflater inflater = (LayoutInflater) _mContext
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
             convertView = inflater.inflate(R.layout.listview_task_item, parent, false);
+
+            mResources = _mContext.getResources();
+
+            mDateFormatFull = new SimpleDateFormat(mResources.getString(R.string.fullFormat));
+            mDateFormatShort = new SimpleDateFormat(mResources.getString(R.string.shortFormat));
+            mDateFormatShort.setTimeZone(TimeZone.getTimeZone(mResources.getString(R.string.timeZone)));
+
             viewHolder = new ViewHolder();
             viewHolder.mTextViewTitle = (TextView) convertView.findViewById(R.id.textViewTaskTitle);
             viewHolder.mTextViewDescription = (TextView) convertView.findViewById(R.id.textViewTaskDescription);
@@ -68,16 +82,26 @@ public class TaskAdapter extends BaseAdapter {
             viewHolder = (ViewHolder) convertView.getTag();
         }
 
-        convertView.setBackgroundColor(_mContext.getResources().getColor(getItem(position).getTaskColor()));
+        mStartTime = mDateFormatFull.format(mTask.getStartTimeTask());
+        mStopTime = mDateFormatFull.format(mTask.getStopTimeTask());
+        mElapsedTime = mDateFormatShort.format(mTask.getStartTimeTask() - mTask.getStopTimeTask());
 
+        convertView.setBackgroundColor(mResources.getColor(mTask.getTaskColor()));
 
-        viewHolder.mTextViewTitle.setText(getItem(position).getTitle());
-        viewHolder.mTextViewDescription.setText(getItem(position).getDescription());
+        viewHolder.mTextViewTitle.setText(mTask.getTitle());
+        viewHolder.mTextViewDescription.setText(mTask.getDescription());
 
         viewHolder.mTextViewTime.setVisibility(View.GONE);
-        viewHolder.mTextViewTime.setText(getItem(position).getFullDate());
 
-        if (_mTask.get(position).isSelected()) {
+
+        if (mTask.isSelected() && mTask.getStartTimeTask() > 0 && mTask.getStopTimeTask() == 0) {
+            String mBeginDate = mStartTime + mResources.getString(R.string.hyphen) + mResources.getString(R.string.noSetDate);
+            viewHolder.mTextViewTime.setText(mBeginDate);
+            viewHolder.mTextViewTime.setVisibility(View.VISIBLE);
+
+        } else if (mTask.isSelected() && mTask.getStopTimeTask() >= 0) {
+            String mFinishDate = mStartTime + mResources.getString(R.string.hyphen) + mStopTime + mResources.getString(R.string.spaceValue) + mElapsedTime;
+            viewHolder.mTextViewTime.setText(mFinishDate);
             viewHolder.mTextViewTime.setVisibility(View.VISIBLE);
         } else {
             viewHolder.mTextViewTime.setVisibility(View.GONE);
