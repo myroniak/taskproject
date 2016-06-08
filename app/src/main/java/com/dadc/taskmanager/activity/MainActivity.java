@@ -71,15 +71,10 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_add_items:
-                if (mTaskArrayList.isEmpty()) {
 
-                    mTaskArrayList.add(0, new Task(getResources().getString(R.string.titleTask), getResources().getString(R.string.descriptionTask), R.color.defaultTaskDate, 0, 0));
-                    addManyTasks();
-                } else {
+                mTaskArrayList.add(0, new Task(getResources().getString(R.string.titleTask), getResources().getString(R.string.descriptionTask), R.color.defaultTaskDate, 0, 0));
+                addManyTasks();
 
-                    addManyTasks();
-                }
-                // Save data SharedPreferences
                 SaveData.saveSetting(MainActivity.this, mTaskArrayList, mSettings, APP_PREFERENCES, editor);
 
                 return true;
@@ -99,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
 
         mSettings = getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE);
         editor = mSettings.edit();
-        mTaskArrayList = new ArrayList<>();
+        // mTaskArrayList = new ArrayList<>();
 
         mRelativeLayoutMainActivity = (CoordinatorLayout) findViewById(R.id.relativeLayoutMainActivity);
         mTaskListView = (ListView) findViewById(R.id.listViewTask);
@@ -127,15 +122,12 @@ public class MainActivity extends AppCompatActivity {
                 //get start time on current item
                 long _mStartTime = mTaskAdapter.getItem(position).getStartTimeTask();
                 long _mStopTime = mTaskAdapter.getItem(position).getStopTimeTask();
-                //set start time
-                //mTaskAdapter.getItem(position).setStartTimeTask(startTimeTask());
 
-                if (_mStartTime == 0 && _mStopTime == 0) {
+                if (_mStartTime == 0) {
                     mTask.setTaskColor(R.color.startTaskDate);
                     mTaskArrayList.get(position).setSelected(true);
                     //set date to TextView after start
-                    mTask.setStartTimeTask(startTimeTask());
-                    mTaskAdapter.notifyDataSetChanged();
+                    mTask.setStartTimeTask(startTimeTask(position));
 
                 } else if (_mStopTime == 0) {
                     mTask.setTaskColor(R.color.stopTaskTime);
@@ -143,7 +135,6 @@ public class MainActivity extends AppCompatActivity {
 
                     //set date to TextView after end
                     mTask.setStopTimeTask(stopTimeTask());
-                    mTaskAdapter.notifyDataSetChanged();
 
                 } else {
                     // reload newDateTask
@@ -152,18 +143,20 @@ public class MainActivity extends AppCompatActivity {
                     mAlertDialogReloadDateTask.setMessage(getResources().getString(R.string.messageAlertDialog));
                     mAlertDialogReloadDateTask.setPositiveButton(getResources().getString(R.string.posBtnAlertDialog), new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int arg1) {
+                            mTask.setTaskColor(R.color.startTaskDate);
                             mTaskArrayList.get(position).setSelected(true);
                             //set start time
-                            mTask.setTaskColor(R.color.startTaskDate);
-                            mTaskAdapter.getItem(position).setStartTimeTask(startTimeTask());
-                            mTaskAdapter.getItem(position).setStopTimeTask(0);
-                            //  mTaskAdapter.getItem(position).setFullDate(newDateTask(mTaskAdapter.getItem(position).setStartTimeTask()));
+                            mTaskAdapter.getItem(position).setStartTimeTask(startTimeTask(position));
+                            SaveData.saveSetting(MainActivity.this, mTaskArrayList, mSettings, APP_PREFERENCES, editor);
                         }
                     });
                     mAlertDialogReloadDateTask.setNegativeButton(getResources().getString(R.string.negBtnAlertDialog), null);
                     mAlertDialogReloadDateTask.setCancelable(false);
                     mAlertDialogReloadDateTask.show();
                 }
+
+                SaveData.saveSetting(MainActivity.this, mTaskArrayList, mSettings, APP_PREFERENCES, editor);
+
 
             }
         });
@@ -184,11 +177,11 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    public long startTimeTask() {
+    public long startTimeTask(int position) {
 
+        mTaskAdapter.getItem(position).setStopTimeTask(0);
         Snackbar.make(mRelativeLayoutMainActivity, getResources().getString(R.string.titleStartTaskSnackBar), Snackbar.LENGTH_LONG).show();
         mTaskAdapter.notifyDataSetChanged();
-        SaveData.saveSetting(MainActivity.this, mTaskArrayList, mSettings, APP_PREFERENCES, editor);
 
         return System.currentTimeMillis();
     }
@@ -199,7 +192,6 @@ public class MainActivity extends AppCompatActivity {
         Snackbar.make(mRelativeLayoutMainActivity, getResources().getString(R.string.titleEndTaskSnackBar), Snackbar.LENGTH_SHORT).show();
         mTaskAdapter.notifyDataSetChanged();
         //Save data SharedPreferences
-        SaveData.saveSetting(MainActivity.this, mTaskArrayList, mSettings, APP_PREFERENCES, editor);
 
         return System.currentTimeMillis();
     }
@@ -212,7 +204,7 @@ public class MainActivity extends AppCompatActivity {
         int k = ((int) (y / o) * 3) - 1;
 
         for (int i = 0; i < k; i++) {
-            mTaskArrayList.add(0, new Task(getResources().getString(R.string.titleTask), getResources().getString(R.string.descriptionTask), R.color.defaultTaskDate, 0, 0));
+            mTaskArrayList.add(0, new Task(getResources().getString(R.string.titleTask) + i, getResources().getString(R.string.descriptionTask), R.color.defaultTaskDate, 0, 0));
         }
         mTaskAdapter.notifyDataSetChanged();
 

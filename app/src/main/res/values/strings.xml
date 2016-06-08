@@ -15,13 +15,13 @@
     <string name="negBtnAlertDialog">НІ</string>
     <string name="titleStartTaskSnackBar">Початок завдання!</string>
     <string name="titleEndTaskSnackBar">Кінець завдання!</string>
-    <string name="fullFormat">dd.MM.yyyy HH:mm:ss</string>
+    <string name="fullFormat">dd.MM.yyyy HH:mm</string>
     <string name="shortFormat">HH:mm:ss</string>
     <string name="timeZone">GMT</string>
     <string name="noSetDate">"**.**.**** **:**"</string>
     <string name="hyphen">" - "</string>
     <string name="spaceValue">"\u0020"</string>
-    <string name="titleTask">"Lorem ipsum"</string>
+    <string name="titleTask">"Lorem ipsum "</string>
     <string name="descriptionTask">"Dolor sit amet"</string>
 
 </resources>

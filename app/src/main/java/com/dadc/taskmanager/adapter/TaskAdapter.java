@@ -84,7 +84,7 @@ public class TaskAdapter extends BaseAdapter {
 
         mStartTime = mDateFormatFull.format(mTask.getStartTimeTask());
         mStopTime = mDateFormatFull.format(mTask.getStopTimeTask());
-        mElapsedTime = mDateFormatShort.format(mTask.getStartTimeTask() - mTask.getStopTimeTask());
+        mElapsedTime = mDateFormatShort.format(mTask.getStopTimeTask() - mTask.getStartTimeTask());
 
         convertView.setBackgroundColor(mResources.getColor(mTask.getTaskColor()));
 
@@ -93,16 +93,17 @@ public class TaskAdapter extends BaseAdapter {
 
         viewHolder.mTextViewTime.setVisibility(View.GONE);
 
-
-        if (mTask.isSelected() && mTask.getStartTimeTask() > 0 && mTask.getStopTimeTask() == 0) {
+//Log.d("myLog", "STOP: " + mTask.getStopTimeTask() + " START: " + mTask.getStopTimeTask());
+        if (mTask.isSelected() && mTask.getStartTimeTask() > 0 && mTask.getStopTimeTask() == 0 ) {
             String mBeginDate = mStartTime + mResources.getString(R.string.hyphen) + mResources.getString(R.string.noSetDate);
             viewHolder.mTextViewTime.setText(mBeginDate);
             viewHolder.mTextViewTime.setVisibility(View.VISIBLE);
 
-        } else if (mTask.isSelected() && mTask.getStopTimeTask() >= 0) {
+        } else if (mTask.isSelected() && mTask.getStopTimeTask() > 0) {
             String mFinishDate = mStartTime + mResources.getString(R.string.hyphen) + mStopTime + mResources.getString(R.string.spaceValue) + mElapsedTime;
             viewHolder.mTextViewTime.setText(mFinishDate);
             viewHolder.mTextViewTime.setVisibility(View.VISIBLE);
+
         } else {
             viewHolder.mTextViewTime.setVisibility(View.GONE);
         }

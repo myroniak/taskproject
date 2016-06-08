@@ -95,6 +95,7 @@ public class Task implements Parcelable {
         mTaskColor = in.readInt();
         mStartTimeTask = in.readLong();
         mStopTimeTask = in.readLong();
+
     }
 
     @Override
