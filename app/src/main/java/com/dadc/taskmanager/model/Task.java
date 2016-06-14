@@ -3,37 +3,30 @@ package com.dadc.taskmanager.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import java.util.Comparator;
 
 /**
  * Created by bomko on 27.05.16.
  */
-public class Task implements Parcelable {
+public class Task implements Parcelable, Comparable<Task> {
 
 
     private String mTitle;
     private String mDescription;
 
-    private static final String KEY_TITLE = "title";
-    private static final String KEY_DESCRIPTION = "description";
-    private static final String KEY_COLOR = "color";
-    private static final String KEY_SELECTED = "selected";
-    private static final String KEY_START_TIME_TASK = "start_task";
-    private static final String KEY_STOP_TIME_TASK = "stop_task";
-
-    private long mStartTimeTask;
-    private long mStopTimeTask;
+    private long mStartDateTask;
+    private long mStopDateTask;
     private int mTaskColor;
+
     private boolean isSelected;
 
 
-    public Task(String mTitle, String mDescription, int mTaskColor, long mStartTimeTask, long mStopTimeTask) {
+    public Task(String mTitle, String mDescription, int mTaskColor, long mStartDateTask, long mStopDateTask) {
         this.mTitle = mTitle;
         this.mDescription = mDescription;
         this.mTaskColor = mTaskColor;
-        this.mStartTimeTask = mStartTimeTask;
-        this.mStopTimeTask = mStopTimeTask;
+        this.mStartDateTask = mStartDateTask;
+        this.mStopDateTask = mStopDateTask;
     }
 
     public String getTitle() {
@@ -44,20 +37,20 @@ public class Task implements Parcelable {
         return mDescription;
     }
 
-    public long getStartTimeTask() {
-        return mStartTimeTask;
+    public long getStartDateTask() {
+        return mStartDateTask;
     }
 
-    public void setStartTimeTask(long startTimeTask) {
-        mStartTimeTask = startTimeTask;
+    public void setStartDateTask(long startDateTask) {
+        mStartDateTask = startDateTask;
     }
 
-    public long getStopTimeTask() {
-        return mStopTimeTask;
+    public long getStopDateTask() {
+        return mStopDateTask;
     }
 
-    public void setStopTimeTask(long stopTimeTask) {
-        mStopTimeTask = stopTimeTask;
+    public void setStopDateTask(long stopDateTask) {
+        mStopDateTask = stopDateTask;
     }
 
     public boolean isSelected() {
@@ -90,11 +83,12 @@ public class Task implements Parcelable {
 
 
     protected Task(Parcel in) {
+
         mTitle = in.readString();
         mDescription = in.readString();
         mTaskColor = in.readInt();
-        mStartTimeTask = in.readLong();
-        mStopTimeTask = in.readLong();
+        mStartDateTask = in.readLong();
+        mStopDateTask = in.readLong();
 
     }
 
@@ -108,38 +102,45 @@ public class Task implements Parcelable {
         dest.writeString(mTitle);
         dest.writeString(mDescription);
         dest.writeInt(mTaskColor);
-        dest.writeLong(mStartTimeTask);
-        dest.writeLong(mStopTimeTask);
+        dest.writeLong(mStartDateTask);
+        dest.writeLong(mStopDateTask);
     }
 
-    public JSONObject toJson() throws JSONException {
-        JSONObject jsonObject = new JSONObject();
 
-        try {
+    public static Comparator<Task> TaskTitleComparator = new Comparator<Task>() {
 
-            jsonObject.put(KEY_TITLE, mTitle);
-            jsonObject.put(KEY_DESCRIPTION, mDescription);
-            jsonObject.put(KEY_COLOR, mTaskColor);
-            jsonObject.put(KEY_START_TIME_TASK, mStartTimeTask);
-            jsonObject.put(KEY_STOP_TIME_TASK, mStopTimeTask);
-            jsonObject.put(KEY_SELECTED, isSelected);
-
-            return jsonObject;
-
-        } catch (JSONException e) {
-            e.printStackTrace();
-            return null;
+        public int compare(Task task1, Task task2) {
+            return task1.getTitle().compareTo(task2.getTitle());
         }
+    };
+
+    public static Comparator<Task> TaskReverseTitleComparator = new Comparator<Task>() {
+
+        public int compare(Task task1, Task task2) {
+            return task2.getTitle().compareTo(task1.getTitle());
+        }
+    };
+
+    public static Comparator<Task> TaskDateComparator = new Comparator<Task>() {
+
+        public int compare(Task task1, Task task2) {
+            return Long.compare(task1.getStartDateTask(), task2.getStartDateTask());
+        }
+    };
+
+    public static Comparator<Task> TaskReverseDateComparator = new Comparator<Task>() {
+
+        public int compare(Task task1, Task task2) {
+            return Long.compare(task2.getStartDateTask(), task1.getStartDateTask());
+        }
+    };
+
+    @Override
+    public int compareTo(Task compareTask) {
+
+        return 0;
+
     }
 
-    public Task(JSONObject jsonObject) throws JSONException {
-
-        mTitle = jsonObject.getString(KEY_TITLE);
-        mDescription = jsonObject.getString(KEY_DESCRIPTION);
-        mTaskColor = jsonObject.getInt(KEY_COLOR);
-        mStartTimeTask = jsonObject.getLong(KEY_START_TIME_TASK);
-        mStopTimeTask = jsonObject.getLong(KEY_STOP_TIME_TASK);
-        isSelected = jsonObject.getBoolean(KEY_SELECTED);
-    }
 
 }

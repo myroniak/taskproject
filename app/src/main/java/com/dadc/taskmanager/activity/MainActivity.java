@@ -1,9 +1,7 @@
 package com.dadc.taskmanager.activity;
 
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.CoordinatorLayout;
@@ -19,29 +17,33 @@ import android.widget.ListView;
 
 import com.dadc.taskmanager.R;
 import com.dadc.taskmanager.adapter.TaskAdapter;
+import com.dadc.taskmanager.dialog.ClearTasksDialogFragment;
 import com.dadc.taskmanager.model.Task;
 import com.dadc.taskmanager.util.SaveData;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Random;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements ClearTasksDialogFragment.ClearTask {
 
     private static final String KEY_SUBMIT_TASK = "submit_task";
     private static final String KEY_SAVE_INSTANCE = "save_instance";
     private static final String KEY_POSITION_ITEM = "position_item";
     private static final String KEY_EDIT_ITEM = "edit_item";
+    private static final int REQUEST_CODE_SETTING = 2;
+    private static final int REQUEST_CODE_TASK = 2;
 
-    SharedPreferences.Editor editor;
-    public static final String APP_PREFERENCES = "setting";
-    SharedPreferences mSettings;
-
-    private ArrayList<Task> mTaskArrayList = new ArrayList<>();
-    private TaskAdapter mTaskAdapter;
+    private AlertDialog.Builder mAlertDialogReloadDateTask;
+    private CoordinatorLayout mRelativeLayoutMainActivity;
     private ListView mTaskListView;
 
-    AlertDialog.Builder mAlertDialogReloadDateTask;
-    CoordinatorLayout mRelativeLayoutMainActivity;
+    private ArrayList<Task> mTaskArrayList;
+    private TaskAdapter mTaskAdapter;
+    private SaveData mSaveData;
 
+    private int defaultTaskColor, startTaskColor, endTaskColor;
+    private boolean doubleBackToExitPressedOnce = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,6 +51,14 @@ public class MainActivity extends AppCompatActivity {
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        assert getSupportActionBar() != null;
+        getSupportActionBar().setTitle(getResources().getString(R.string.main_activity_name));
+
+        mSaveData = new SaveData(this);
+
+        defaultTaskColor = mSaveData.getDateDefaultColor();
+        startTaskColor = mSaveData.getDateStartColor();
+        endTaskColor = mSaveData.getDateEndColor();
 
         if (savedInstanceState != null) {
 
@@ -64,90 +74,144 @@ public class MainActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
+
+        mSaveData.getItemChecked(menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
+
+        int id = item.getItemId();
+
+        switch (id) {
+            case R.id.action_a_z:
+
+                item.setChecked(true);
+                mSaveData.chacked(item);
+                Collections.sort(mTaskArrayList, Task.TaskTitleComparator);
+                mTaskAdapter.notifyDataSetChanged();
+                mSaveData.saveData(mTaskArrayList);
+                return true;
+
+            case R.id.action_z_a:
+                item.setChecked(true);
+                mSaveData.chacked(item);
+                Collections.sort(mTaskArrayList, Task.TaskReverseTitleComparator);
+                mTaskAdapter.notifyDataSetChanged();
+                mSaveData.saveData(mTaskArrayList);
+
+                return true;
+
+            case R.id.action_first_end:
+                item.setChecked(true);
+                mSaveData.chacked(item);
+                Collections.sort(mTaskArrayList, Task.TaskDateComparator);
+                mTaskAdapter.notifyDataSetChanged();
+                mSaveData.saveData(mTaskArrayList);
+
+                return true;
+
+
+            case R.id.action_end_first:
+
+                item.setChecked(true);
+                mSaveData.chacked(item);
+                Collections.sort(mTaskArrayList, Task.TaskReverseDateComparator);
+                mTaskAdapter.notifyDataSetChanged();
+                mSaveData.saveData(mTaskArrayList);
+
+                return true;
+
+            case R.id.action_setting:
+
+                Intent intentSetting = new Intent(MainActivity.this, SettingActivity.class);
+                startActivityForResult(intentSetting, REQUEST_CODE_SETTING);
+
+                return true;
+
+            case R.id.action_add:
+
+                Intent intent = new Intent(MainActivity.this, NewTaskActivity.class);
+                startActivityForResult(intent, REQUEST_CODE_TASK);
+
+                return true;
+
             case R.id.action_add_items:
 
-                mTaskArrayList.add(0, new Task(getResources().getString(R.string.titleTask), getResources().getString(R.string.descriptionTask), R.color.defaultTaskDate, 0, 0));
                 addManyTasks();
-
-                SaveData.saveSetting(MainActivity.this, mTaskArrayList, mSettings, APP_PREFERENCES, editor);
 
                 return true;
             case R.id.action_delete_items:
-                mTaskArrayList.clear();
-                SaveData.clearData(editor);
 
-                mTaskAdapter.notifyDataSetChanged();
+                new ClearTasksDialogFragment().show(getFragmentManager(), "");
+
+                return true;
+
+            case R.id.action_exit:
+
+                finish();
+
                 return true;
             default:
-                return true;
+                return super.onOptionsItemSelected(item);
         }
     }
 
     // initialize widget and adapter
     public void initUI() {
 
-        mSettings = getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE);
-        editor = mSettings.edit();
-        // mTaskArrayList = new ArrayList<>();
-
         mRelativeLayoutMainActivity = (CoordinatorLayout) findViewById(R.id.relativeLayoutMainActivity);
+
+        mTaskArrayList = new ArrayList<>();
         mTaskListView = (ListView) findViewById(R.id.listViewTask);
         mTaskAdapter = new TaskAdapter(this, mTaskArrayList);
         mTaskListView.setAdapter(mTaskAdapter);
 
         // LoadData from SharedPreferences in Thread
-        Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-            @Override
+        new Thread(new Runnable() {
             public void run() {
-
-                mTaskArrayList = SaveData.loadSetting(mSettings);
+                mTaskArrayList = mSaveData.loadData();
                 mTaskAdapter = new TaskAdapter(MainActivity.this, mTaskArrayList);
                 mTaskListView.setAdapter(mTaskAdapter);
-
             }
-        }, 500);
+        }).start();
 
         mTaskListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> av, final View v, final int position, long id) {
                 final Task mTask = mTaskAdapter.getItem(position);
 
-                //get start time on current item
-                long _mStartTime = mTaskAdapter.getItem(position).getStartTimeTask();
-                long _mStopTime = mTaskAdapter.getItem(position).getStopTimeTask();
+                //get start date on current item
+                long _mStartDate = mTaskAdapter.getItem(position).getStartDateTask();
+                long _mStopDate = mTaskAdapter.getItem(position).getStopDateTask();
 
-                if (_mStartTime == 0) {
-                    mTask.setTaskColor(R.color.startTaskDate);
+                if (_mStartDate == 0) {
+                    mTask.setTaskColor(startTaskColor);
                     mTaskArrayList.get(position).setSelected(true);
-                    //set date to TextView after start
-                    mTask.setStartTimeTask(startTimeTask(position));
 
-                } else if (_mStopTime == 0) {
-                    mTask.setTaskColor(R.color.stopTaskTime);
+                    //set date to TextView after start
+                    mTask.setStartDateTask(startDateTask(position));
+
+                } else if (_mStopDate == 0) {
+                    mTask.setTaskColor(endTaskColor);
                     mTaskArrayList.get(position).setSelected(true);
 
                     //set date to TextView after end
-                    mTask.setStopTimeTask(stopTimeTask());
+                    mTask.setStopDateTask(stopDateTask());
 
                 } else {
-                    // reload newDateTask
+                    // reload dateTask
                     mAlertDialogReloadDateTask = new AlertDialog.Builder(MainActivity.this);
                     mAlertDialogReloadDateTask.setTitle(getResources().getString(R.string.titleAlertDialog));
                     mAlertDialogReloadDateTask.setMessage(getResources().getString(R.string.messageAlertDialog));
                     mAlertDialogReloadDateTask.setPositiveButton(getResources().getString(R.string.posBtnAlertDialog), new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int arg1) {
-                            mTask.setTaskColor(R.color.startTaskDate);
+                            mTask.setTaskColor(startTaskColor);
                             mTaskArrayList.get(position).setSelected(true);
-                            //set start time
-                            mTaskAdapter.getItem(position).setStartTimeTask(startTimeTask(position));
-                            SaveData.saveSetting(MainActivity.this, mTaskArrayList, mSettings, APP_PREFERENCES, editor);
+                            //set start date
+                            mTaskAdapter.getItem(position).setStartDateTask(startDateTask(position));
+                            mSaveData.saveData(mTaskArrayList);
                         }
                     });
                     mAlertDialogReloadDateTask.setNegativeButton(getResources().getString(R.string.negBtnAlertDialog), null);
@@ -155,9 +219,7 @@ public class MainActivity extends AppCompatActivity {
                     mAlertDialogReloadDateTask.show();
                 }
 
-                SaveData.saveSetting(MainActivity.this, mTaskArrayList, mSettings, APP_PREFERENCES, editor);
-
-
+                mSaveData.saveData(mTaskArrayList);
             }
         });
 
@@ -170,54 +232,78 @@ public class MainActivity extends AppCompatActivity {
                 Intent intent = new Intent(MainActivity.this, NewTaskActivity.class);
                 intent.putExtra(KEY_EDIT_ITEM, title);
                 intent.putExtra(KEY_POSITION_ITEM, position);
-                startActivityForResult(intent, 1);
+                startActivityForResult(intent, REQUEST_CODE_TASK);
 
                 return true;
             }
         });
     }
 
-    public long startTimeTask(int position) {
+    // Transition to  NewTaskActivity for new Task
+    public void onClickNewTask(View view) {
 
-        mTaskAdapter.getItem(position).setStopTimeTask(0);
-        Snackbar.make(mRelativeLayoutMainActivity, getResources().getString(R.string.titleStartTaskSnackBar), Snackbar.LENGTH_LONG).show();
+        Intent intent = new Intent(MainActivity.this, NewTaskActivity.class);
+        startActivityForResult(intent, REQUEST_CODE_TASK);
+    }
+
+
+    public long startDateTask(int position) {
+
+        openSnackbar(getResources().getString(R.string.titleStartTaskSnackBar));
+        mTaskAdapter.getItem(position).setStopDateTask(0);
         mTaskAdapter.notifyDataSetChanged();
 
         return System.currentTimeMillis();
     }
 
-    public long stopTimeTask() {
+    public long stopDateTask() {
 
         //Show state DateTask
-        Snackbar.make(mRelativeLayoutMainActivity, getResources().getString(R.string.titleEndTaskSnackBar), Snackbar.LENGTH_SHORT).show();
+        openSnackbar(getResources().getString(R.string.titleEndTaskSnackBar));
         mTaskAdapter.notifyDataSetChanged();
-        //Save data SharedPreferences
 
         return System.currentTimeMillis();
     }
 
 
+    private int getHeightItemListView(ListView listView, TaskAdapter listAdapter) {
+
+        int heightItem;
+        View listItem = listAdapter.getView(0, null, listView);
+        listItem.measure(0, 0);
+        heightItem = listItem.getMeasuredHeight() + listView.getDividerHeight(); //ListView item height
+
+        return heightItem;
+    }
+
+    /*
+     * This method auto generated and include 3 times more task than fits on the screen.
+     */
+
     public void addManyTasks() {
+
+        mTaskArrayList.add(0, new Task(getResources().getString(R.string.titleTask) + 1,
+                getResources().getString(R.string.descriptionTask) + 1,
+                defaultTaskColor, 0, 0));
 
         float o = getHeightItemListView(mTaskListView, mTaskAdapter);
         float y = mTaskListView.getHeight();
         int k = ((int) (y / o) * 3) - 1;
 
         for (int i = 0; i < k; i++) {
-            mTaskArrayList.add(0, new Task(getResources().getString(R.string.titleTask) + i, getResources().getString(R.string.descriptionTask), R.color.defaultTaskDate, 0, 0));
+            Random r = new Random();
+            int random = r.nextInt((100 - 2) + 2) + 2;
+            mTaskArrayList.add(0, new Task(getResources().getString(R.string.titleTask) + random, getResources().getString(R.string.descriptionTask) + random,
+                    defaultTaskColor, 0, 0));
         }
-        mTaskAdapter.notifyDataSetChanged();
 
+        mTaskAdapter.notifyDataSetChanged();
+        mSaveData.saveData(mTaskArrayList);
     }
 
-    private int getHeightItemListView(ListView listView, TaskAdapter listAdapter) {
 
-        int heightItem = 0;//it is the ListView Height
-        View listItem = listAdapter.getView(0, null, listView);
-        listItem.measure(0, 0);
-        heightItem = listItem.getMeasuredHeight() + listView.getDividerHeight();//item height
-
-        return heightItem;
+    public void openSnackbar(CharSequence title) {
+        Snackbar.make(mRelativeLayoutMainActivity, title, Snackbar.LENGTH_LONG).show();
     }
 
     @Override
@@ -228,33 +314,53 @@ public class MainActivity extends AppCompatActivity {
             int position = intent.getIntExtra(KEY_POSITION_ITEM, -1);
 
             if (position > -1) {
-                // Update item listView
-                mTaskArrayList.set(position, myTask);
+                mTaskArrayList.set(position, myTask); //Update item listView
             } else {
                 // Add element to position 0 in mTaskListView
                 mTaskArrayList.add(0, myTask);
-
             }
 
-            mTaskAdapter.notifyDataSetChanged();
+            mSaveData.chacked(null);
+            this.invalidateOptionsMenu();
 
-            // Save data SharedPreferences
-            SaveData.saveSetting(this, mTaskArrayList, mSettings, APP_PREFERENCES, editor);
+        } else if (resultCode == REQUEST_CODE_SETTING) {
 
+            mSaveData.updateColorDateTask(mTaskArrayList);
         }
+
+        mTaskAdapter.notifyDataSetChanged();
+        mSaveData.saveData(mTaskArrayList); //Save data SharedPreferences
 
     }
 
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
+
         savedInstanceState.putParcelableArrayList(KEY_SAVE_INSTANCE, mTaskArrayList);
     }
 
-    // transition to  NewTaskActivity for new Task
-    public void newTask(View view) {
+    @Override
+    public void onBackPressed() {
+        if (doubleBackToExitPressedOnce) {
+            super.onBackPressed();
+        }
 
-        Intent intent = new Intent(MainActivity.this, NewTaskActivity.class);
-        startActivityForResult(intent, 1);
+        this.doubleBackToExitPressedOnce = true;
+
+        new Handler().postDelayed(new Runnable() {
+
+            @Override
+            public void run() {
+                doubleBackToExitPressedOnce = false;
+            }
+        }, 2000);
+
+        openSnackbar(getResources().getString(R.string.titleExitTwice));
+    }
+
+    @Override
+    public void clearData() {
+        mSaveData.clearData(mTaskArrayList, mTaskAdapter);
     }
 }

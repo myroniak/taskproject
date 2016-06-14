@@ -9,8 +9,9 @@
     <color name="colorDarkRed">#9c3b42</color>
     <color name="colorGrey">#727272</color>
     <color name="colorBlack">#212121</color>
-    <color name="startTaskDate">#46ffcc00</color>
-    <color name="stopTaskTime">#46ff0000</color>
-    <color name="defaultTaskDate">#4666ff00</color>
+    <color name="colorDefaultTask">#d0f4b9</color>
+    <color name="colorStartTask">#f6ffa6</color>
+    <color name="colorEndTask">#ff7f7f</color>
+
     <color name="colorLightTextButton">#F0F4C3</color>
 </resources>

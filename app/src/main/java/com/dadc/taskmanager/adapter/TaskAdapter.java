@@ -20,12 +20,11 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.TimeZone;
 
-
 public class TaskAdapter extends BaseAdapter {
     Context _mContext;
     ArrayList<Task> _mTaskArrayList;
     DateFormat mDateFormatFull, mDateFormatShort;
-    String mStartTime, mStopTime, mElapsedTime;
+    String mStartDate, mStopDate, mElapsedDate;
     Resources mResources;
 
     public TaskAdapter(Context context, ArrayList<Task> mTaskArrayList) {
@@ -51,7 +50,7 @@ public class TaskAdapter extends BaseAdapter {
     static class ViewHolder {
         TextView mTextViewTitle;
         TextView mTextViewDescription;
-        TextView mTextViewTime;
+        TextView mTextViewDate;
     }
 
     public View getView(int position, View convertView, ViewGroup parent) {
@@ -73,7 +72,7 @@ public class TaskAdapter extends BaseAdapter {
             viewHolder = new ViewHolder();
             viewHolder.mTextViewTitle = (TextView) convertView.findViewById(R.id.textViewTaskTitle);
             viewHolder.mTextViewDescription = (TextView) convertView.findViewById(R.id.textViewTaskDescription);
-            viewHolder.mTextViewTime = (TextView) convertView.findViewById(R.id.textViewTaskTime);
+            viewHolder.mTextViewDate = (TextView) convertView.findViewById(R.id.textViewTaskDate);
 
             convertView.setTag(viewHolder);
 
@@ -82,30 +81,29 @@ public class TaskAdapter extends BaseAdapter {
             viewHolder = (ViewHolder) convertView.getTag();
         }
 
-        mStartTime = mDateFormatFull.format(mTask.getStartTimeTask());
-        mStopTime = mDateFormatFull.format(mTask.getStopTimeTask());
-        mElapsedTime = mDateFormatShort.format(mTask.getStopTimeTask() - mTask.getStartTimeTask());
+        mStartDate = mDateFormatFull.format(mTask.getStartDateTask());
+        mStopDate = mDateFormatFull.format(mTask.getStopDateTask());
+        mElapsedDate = mDateFormatShort.format(mTask.getStopDateTask() - mTask.getStartDateTask());
 
-        convertView.setBackgroundColor(mResources.getColor(mTask.getTaskColor()));
+        convertView.setBackgroundColor(mTask.getTaskColor());
 
         viewHolder.mTextViewTitle.setText(mTask.getTitle());
         viewHolder.mTextViewDescription.setText(mTask.getDescription());
 
-        viewHolder.mTextViewTime.setVisibility(View.GONE);
+        viewHolder.mTextViewDate.setVisibility(View.GONE);
 
-//Log.d("myLog", "STOP: " + mTask.getStopTimeTask() + " START: " + mTask.getStopTimeTask());
-        if (mTask.isSelected() && mTask.getStartTimeTask() > 0 && mTask.getStopTimeTask() == 0 ) {
-            String mBeginDate = mStartTime + mResources.getString(R.string.hyphen) + mResources.getString(R.string.noSetDate);
-            viewHolder.mTextViewTime.setText(mBeginDate);
-            viewHolder.mTextViewTime.setVisibility(View.VISIBLE);
+        if (mTask.isSelected() && mTask.getStartDateTask() > 0 && mTask.getStopDateTask() == 0) {
+            String mBeginDate = mStartDate + mResources.getString(R.string.hyphen) + mResources.getString(R.string.noSetDate);
+            viewHolder.mTextViewDate.setText(mBeginDate);
+            viewHolder.mTextViewDate.setVisibility(View.VISIBLE);
 
-        } else if (mTask.isSelected() && mTask.getStopTimeTask() > 0) {
-            String mFinishDate = mStartTime + mResources.getString(R.string.hyphen) + mStopTime + mResources.getString(R.string.spaceValue) + mElapsedTime;
-            viewHolder.mTextViewTime.setText(mFinishDate);
-            viewHolder.mTextViewTime.setVisibility(View.VISIBLE);
+        } else if (mTask.isSelected() && mTask.getStopDateTask() > 0) {
+            String mFinishDate = mStartDate + mResources.getString(R.string.hyphen) + mStopDate + mResources.getString(R.string.spaceValue) + mElapsedDate;
+            viewHolder.mTextViewDate.setText(mFinishDate);
+            viewHolder.mTextViewDate.setVisibility(View.VISIBLE);
 
         } else {
-            viewHolder.mTextViewTime.setVisibility(View.GONE);
+            viewHolder.mTextViewDate.setVisibility(View.GONE);
         }
         return convertView;
     }
