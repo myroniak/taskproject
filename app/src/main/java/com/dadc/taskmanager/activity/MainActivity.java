@@ -45,6 +45,7 @@ public class MainActivity extends AppCompatActivity implements ClearDialogFragme
 
     private int mDefaultTaskColor, mStartTaskColor, mEndTaskColor;
     private boolean mDoubleBackToExitPressedOnce = false;
+    MenuItem item1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,43 +81,34 @@ public class MainActivity extends AppCompatActivity implements ClearDialogFragme
     public boolean onOptionsItemSelected(MenuItem item) {
 
         int id = item.getItemId();
-
+        item1 = item;
         switch (id) {
             case R.id.action_a_z:
 
-                item.setChecked(true);
-                mControlDataTask.saveCheckedItem(item); //Save checkedItem in SharedPreferences
                 Collections.sort(mTaskArrayList, Task.TaskTitleComparator);
-                mTaskAdapter.notifyDataSetChanged();
-                mControlDataTask.savePreferenceDataTask(mTaskArrayList); //Save data in SharedPreferences
+                saveSortTask(item);
+
                 return true;
 
             case R.id.action_z_a:
-                item.setChecked(true);
-                mControlDataTask.saveCheckedItem(item); //Save checkedItem in SharedPreferences
+
                 Collections.sort(mTaskArrayList, Task.TaskReverseTitleComparator);
-                mTaskAdapter.notifyDataSetChanged();
-                mControlDataTask.savePreferenceDataTask(mTaskArrayList); //Save data in SharedPreferences
+                saveSortTask(item);
 
                 return true;
 
             case R.id.action_first_end:
-                item.setChecked(true);
-                mControlDataTask.saveCheckedItem(item); //Save checkedItem in SharedPreferences
+
                 Collections.sort(mTaskArrayList, Task.TaskDateComparator);
-                mTaskAdapter.notifyDataSetChanged();
-                mControlDataTask.savePreferenceDataTask(mTaskArrayList); //Save data in SharedPreferences
+                saveSortTask(item);
 
                 return true;
 
 
             case R.id.action_end_first:
 
-                item.setChecked(true);
-                mControlDataTask.saveCheckedItem(item); //Save checkedItem in SharedPreferences
                 Collections.sort(mTaskArrayList, Task.TaskReverseDateComparator);
-                mTaskAdapter.notifyDataSetChanged();
-                mControlDataTask.savePreferenceDataTask(mTaskArrayList);  //Save data in SharedPreferences
+                saveSortTask(item);
 
                 return true;
 
@@ -315,6 +307,16 @@ public class MainActivity extends AppCompatActivity implements ClearDialogFragme
 
     public void openSnackbar(CharSequence title) {
         Snackbar.make(mRelativeLayoutMainActivity, title, Snackbar.LENGTH_LONG).show();
+    }
+
+
+    public void saveSortTask(MenuItem item) {
+
+        item.setChecked(true);
+        mControlDataTask.saveCheckedItem(item); //Save checkedItem in SharedPreferences
+        mTaskAdapter.notifyDataSetChanged();
+        mControlDataTask.savePreferenceDataTask(mTaskArrayList);  //Save data in SharedPreferences
+
     }
 
     @Override
