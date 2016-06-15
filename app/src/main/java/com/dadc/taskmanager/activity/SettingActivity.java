@@ -12,9 +12,19 @@ import com.dadc.taskmanager.R;
 
 import yuku.ambilwarna.widget.AmbilWarnaPreference;
 
+/**
+ * Created by bomko on 11.05.16.
+ */
+
 public class SettingActivity extends AppCompatActivity {
 
-    Intent intent;
+    private static final String KEY_COLOR_DEFAULT = "colorDateDefault";
+    private static final String KEY_COLOR_START = "colorDateStart";
+    private static final String KEY_COLOR_END = "colorDateEnd";
+    private static final String KEY_PREF_BUTTON = "defaultButton";
+    private static final int SETTING_RESULT_CODE = 2;
+
+    Intent mIntent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,15 +37,19 @@ public class SettingActivity extends AppCompatActivity {
         assert getSupportActionBar() != null;
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        intent = new Intent();
-        getFragmentManager().beginTransaction().replace(R.id.content_frame, new MyPreferenceFragment()).commit();
+        mIntent = new Intent();
+
+        getFragmentManager().beginTransaction().replace(R.id.content_frame, new TaskPreferenceFragment()).commit();
+
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
+
                 onBackPressed();
+
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -44,35 +58,34 @@ public class SettingActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
 
-        setResult(2, intent);
+        setResult(SETTING_RESULT_CODE, mIntent);
 
         super.onBackPressed();
     }
 
 
-    public static class MyPreferenceFragment extends PreferenceFragment {
+    public static class TaskPreferenceFragment extends PreferenceFragment {
 
-
-        AmbilWarnaPreference colorDefault, colorStart, colorEnd;
+        AmbilWarnaPreference mColorDefault, mColorStart, mColorEnd;
 
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
             addPreferencesFromResource(R.xml.fragment_preference);
 
-            colorDefault = (AmbilWarnaPreference) findPreference("colorDateDefault");
-            colorStart = (AmbilWarnaPreference) findPreference("colorDateStart");
-            colorEnd = (AmbilWarnaPreference) findPreference("colorDateEnd");
+            mColorDefault = (AmbilWarnaPreference) findPreference(KEY_COLOR_DEFAULT);
+            mColorStart = (AmbilWarnaPreference) findPreference(KEY_COLOR_START);
+            mColorEnd = (AmbilWarnaPreference) findPreference(KEY_COLOR_END);
 
+            Preference mPrefButton = findPreference(KEY_PREF_BUTTON);
 
-            Preference button = findPreference("default");
-            button.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            mPrefButton.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
 
-                    colorDefault.forceSetValue(0x4666ff00);
-                    colorStart.forceSetValue(0x46ffcc00);
-                    colorEnd.forceSetValue(0x46ff0000);
+                    mColorDefault.forceSetValue(getResources().getColor(R.color.colorDefaultTask));
+                    mColorStart.forceSetValue(getResources().getColor(R.color.colorStartTask));
+                    mColorEnd.forceSetValue(getResources().getColor(R.color.colorEndTask));
 
                     return true;
                 }

@@ -17,55 +17,58 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 
 /**
- * Created by bomko on 14.06.16.
+ * Created by bomko on 12.06.16.
  */
-public class SaveData {
+
+public class ControlDataTask {
+
     private static final String APP_PREFERENCES = "setting";
     private static final String KEY_VALUE = "key";
     private static final String DEFAULT_COLOR_DATE = "colorDateDefault";
     private static final String START_COLOR_DATE = "colorDateStart";
     private static final String END_COLOR_DATE = "colorDateEnd";
     private static final String CHECKED_ITEM = "checked";
+
     private SharedPreferences.Editor mEditor;
     public SharedPreferences mSettings, mDefaultSetting;
 
-    GsonBuilder builder;
+    GsonBuilder mGsonBuilder;
     Context mContext;
-    Gson gson;
+    Gson mGson;
 
-    public SaveData(Context mContext) {
+    public ControlDataTask(Context mContext) {
 
         this.mContext = mContext;
 
-        builder = new GsonBuilder();
-        gson = builder.create();
+        mGsonBuilder = new GsonBuilder();
+        mGson = mGsonBuilder.create();
         mSettings = mContext.getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE);
         mDefaultSetting = PreferenceManager.getDefaultSharedPreferences(mContext);
         mEditor = mSettings.edit();
     }
 
-    public void saveData(ArrayList<Task> taskArrayList) {
+    public void savePreferenceDataTask(ArrayList<Task> taskArrayList) {
 
-        String jsonStr = gson.toJson(taskArrayList);
+        String jsonStr = mGson.toJson(taskArrayList);
         mEditor.putString(KEY_VALUE, jsonStr);
         mEditor.apply();
 
     }
 
-    public ArrayList<Task> loadData() {
+    public ArrayList<Task> loadPreferenceDataTask() {
 
         ArrayList<Task> taskArrayList = new ArrayList<>();
         Type collectionType = new TypeToken<ArrayList<Task>>() {
         }.getType();
 
         if (mSettings.contains(KEY_VALUE)) {
-            taskArrayList = gson.fromJson(mSettings.getString(KEY_VALUE, ""), collectionType);
+            taskArrayList = mGson.fromJson(mSettings.getString(KEY_VALUE, ""), collectionType);
         }
 
         return taskArrayList;
     }
 
-    public void clearData(ArrayList<Task> mTaskArrayList, TaskAdapter mTaskAdapter) {
+    public void clearPreferenceDataTask(ArrayList<Task> mTaskArrayList, TaskAdapter mTaskAdapter) {
 
         mEditor.remove(KEY_VALUE);
         mEditor.clear();
@@ -76,13 +79,13 @@ public class SaveData {
 
     }
 
-    public void chacked(MenuItem item) {
+    public void saveCheckedItem(MenuItem item) {
 
         mEditor.putString(CHECKED_ITEM, item.toString());
         mEditor.commit();
     }
 
-    public MenuItem getItemChecked(Menu menu) {
+    public MenuItem loadCheckedItem(Menu menu) {
 
         MenuItem menuItem = null;
 

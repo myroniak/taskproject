@@ -12,9 +12,9 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="1"
+        android:padding="5dp"
         android:textColor="@color/colorBlack"
-        android:textSize="@dimen/text_size_title"
-        android:padding="5dp">
+        android:textSize="@dimen/text_size_title">
     </TextView>
 
     <TextView
@@ -22,8 +22,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:textColor="@color/colorGrey"
-        android:padding="5dp">
+        android:padding="5dp"
+        android:textColor="@color/colorGrey">
     </TextView>
 
 
@@ -32,8 +32,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:textColor="#2300bf"
-        android:padding="5dp">
+        android:padding="5dp"
+        android:textColor="#2300bf">
     </TextView>
 
 

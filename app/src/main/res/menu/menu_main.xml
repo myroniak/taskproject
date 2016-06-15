@@ -6,7 +6,7 @@
     <item
         android:id="@+id/menu_spinner"
         android:icon="@drawable/ic_sort_white_24dp"
-        android:title=""
+        android:title="@string/settings_sort"
         app:showAsAction="ifRoom">
         <menu>
             <group android:checkableBehavior="single">
@@ -36,13 +36,13 @@
     <item
         android:id="@+id/action_setting"
         android:icon="@drawable/ic_settings_white_24dp"
-        android:title=""
+        android:title="@string/settings_name"
         app:showAsAction="ifRoom"/>
 
     <item
         android:id="@+id/action_add"
-        android:title="@string/action_add_item"
         android:icon="@drawable/ic_add_white_24dp"
+        android:title="@string/action_add_item"
         app:showAsAction="ifRoom"/>
 
     <item

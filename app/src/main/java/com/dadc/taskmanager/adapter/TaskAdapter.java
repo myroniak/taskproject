@@ -21,25 +21,25 @@ import java.util.ArrayList;
 import java.util.TimeZone;
 
 public class TaskAdapter extends BaseAdapter {
-    Context _mContext;
-    ArrayList<Task> _mTaskArrayList;
+    Context mContext;
+    ArrayList<Task> mTaskArrayList;
     DateFormat mDateFormatFull, mDateFormatShort;
     String mStartDate, mStopDate, mElapsedDate;
     Resources mResources;
 
     public TaskAdapter(Context context, ArrayList<Task> mTaskArrayList) {
-        _mContext = context;
-        _mTaskArrayList = mTaskArrayList;
+        this.mContext = context;
+        this.mTaskArrayList = mTaskArrayList;
     }
 
     @Override
     public int getCount() {
-        return _mTaskArrayList.size();
+        return mTaskArrayList.size();
     }
 
     @Override
     public Task getItem(int position) {
-        return _mTaskArrayList.get(position);
+        return mTaskArrayList.get(position);
     }
 
     @Override
@@ -58,12 +58,12 @@ public class TaskAdapter extends BaseAdapter {
         ViewHolder viewHolder;
         Task mTask = getItem(position);
         if (convertView == null) {
-            LayoutInflater inflater = (LayoutInflater) _mContext
+            LayoutInflater inflater = (LayoutInflater) mContext
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
             convertView = inflater.inflate(R.layout.listview_task_item, parent, false);
 
-            mResources = _mContext.getResources();
+            mResources = mContext.getResources();
 
             mDateFormatFull = new SimpleDateFormat(mResources.getString(R.string.fullFormat));
             mDateFormatShort = new SimpleDateFormat(mResources.getString(R.string.shortFormat));

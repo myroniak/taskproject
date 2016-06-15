@@ -7,29 +7,29 @@
         android:title="@string/pref_title_category_first">
 
         <yuku.ambilwarna.widget.AmbilWarnaPreference
-            android:defaultValue="0x4666ff00"
+            android:defaultValue="@color/colorDefaultTask"
             android:key="colorDateDefault"
             android:title="@string/pref_title_color_default"
-            app:supportsAlpha="true"/>
+            app:supportsAlpha="false"/>
 
         <yuku.ambilwarna.widget.AmbilWarnaPreference
-            android:defaultValue="0x46ffcc00"
+            android:defaultValue="@color/colorStartTask"
             android:key="colorDateStart"
             android:title="@string/pref_title_color_start"
-            app:supportsAlpha="true"/>
+            app:supportsAlpha="false"/>
 
         <yuku.ambilwarna.widget.AmbilWarnaPreference
-            android:defaultValue="0x46ff0000"
+            android:defaultValue="@color/colorEndTask"
             android:key="colorDateEnd"
             android:title="@string/pref_title_color_end"
-            app:supportsAlpha="true"/>
+            app:supportsAlpha="false"/>
 
     </PreferenceCategory>
 
     <PreferenceCategory
         android:title="@string/pref_title_category_second">
         <Preference
-            android:key="default"
+            android:key="defaultButton"
             android:summary="@string/pref_summary_set_default_value"
             android:title="@string/pref_title_set_default_value"/>
 

@@ -37,7 +37,7 @@
         android:layout_marginRight="20dp"
         android:onClick="onClickNewTask"
         android:src="@drawable/ic_add_white_24dp"
- >
+        >
     </android.support.design.widget.FloatingActionButton>
 
 </android.support.design.widget.CoordinatorLayout>

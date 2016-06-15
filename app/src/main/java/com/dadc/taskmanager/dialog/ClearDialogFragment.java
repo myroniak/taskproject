@@ -1,7 +1,7 @@
 package com.dadc.taskmanager.dialog;
 
 /**
- * Created by bomko on 13.06.16.
+ * Created by bomko on 11.06.16.
  */
 
 import android.app.Activity;
@@ -13,16 +13,16 @@ import android.os.Bundle;
 
 import com.dadc.taskmanager.R;
 
-public class ClearTasksDialogFragment extends DialogFragment {
-    public interface ClearTask {
-        void clearData();
+public class ClearDialogFragment extends DialogFragment {
+    public interface ClearTasks {
+        void clearTaskList();
     }
 
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        if (!(activity instanceof ClearTask)) {
-            throw new ClassCastException(activity.toString() + " must implement DeleteAllItem");
+        if (!(activity instanceof ClearTasks)) {
+            throw new ClassCastException(activity.toString());
         }
     }
 
@@ -34,7 +34,7 @@ public class ClearTasksDialogFragment extends DialogFragment {
                 .setPositiveButton(R.string.posBtnAlertDialog,
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int whichButton) {
-                                ((ClearTask) getActivity()).clearData();
+                                ((ClearTasks) getActivity()).clearTaskList();
                             }
                         }
                 )

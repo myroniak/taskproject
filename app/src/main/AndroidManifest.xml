@@ -19,8 +19,8 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activity.NewTaskActivity"
-            android:label="@string/create_name"
+            android:name=".activity.TaskActivity"
+            android:label="@string/activity_create_task"
             android:theme="@style/AppTheme.NoActionBar">
         </activity>
         <activity

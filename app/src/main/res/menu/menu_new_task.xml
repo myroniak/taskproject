@@ -4,15 +4,9 @@
       tools:context=".activity.MainActivity">
 
     <item
-        android:id="@+id/action_discard"
-        android:icon="@drawable/ic_clear_white_24dp"
-        android:title=""
-        app:showAsAction="ifRoom"/>
-
-    <item
         android:id="@+id/action_done"
         android:icon="@drawable/ic_check_white_24dp"
-        android:title=""
+        android:title="@string/action_save"
         app:showAsAction="ifRoom"/>
 
 </menu>

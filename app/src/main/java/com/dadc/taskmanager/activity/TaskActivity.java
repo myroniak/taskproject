@@ -10,49 +10,55 @@ import android.widget.EditText;
 
 import com.dadc.taskmanager.R;
 import com.dadc.taskmanager.model.Task;
-import com.dadc.taskmanager.util.SaveData;
+import com.dadc.taskmanager.util.ControlDataTask;
 
 /**
  * Created by bomko on 27.05.16.
  */
-public class NewTaskActivity extends AppCompatActivity {
+public class TaskActivity extends AppCompatActivity {
 
     private static final String KEY_SUBMIT_TASK = "submit_task";
     private static final String KEY_POSITION_ITEM = "position_item";
     private static final String KEY_EDIT_ITEM = "edit_item";
+    private static final String KEY_TITLE_ACTIVITY = "title_edit_task";
 
     private EditText mEditTextTitle, mEditTextDescription;
-    private int position, defaultTaskColor;
+    private int mPosition, mDefaultTaskColor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.create_task_activity);
 
-
+        // ActionBar mActionBar = getSupportActionBar();
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        assert getSupportActionBar() != null;
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_clear_white_24dp);
 
         mEditTextTitle = (EditText) findViewById(R.id.titleEditText);
         mEditTextDescription = (EditText) findViewById(R.id.descriptionEditText);
 
         // get data from intent for edit item content
-        Task taskEdit = getIntent().getParcelableExtra(KEY_EDIT_ITEM);
-        position = getIntent().getIntExtra(KEY_POSITION_ITEM, -1);
+        Task mTaskEdit = getIntent().getParcelableExtra(KEY_EDIT_ITEM);
+        mPosition = getIntent().getIntExtra(KEY_POSITION_ITEM, -1);
+        String mTitleActivity = getIntent().getStringExtra(KEY_TITLE_ACTIVITY);
 
-        if (taskEdit != null) {
-            mEditTextTitle.setText(taskEdit.getTitle());
-            mEditTextDescription.setText(taskEdit.getDescription());
+        if (mTaskEdit != null) {
+            mEditTextTitle.setText(mTaskEdit.getTitle());
+            mEditTextDescription.setText(mTaskEdit.getDescription());
+            getSupportActionBar().setTitle(mTitleActivity);
         }
 
-        SaveData mSaveDate = new SaveData(this);
+        ControlDataTask mControlDataTask = new ControlDataTask(this);
 
-        defaultTaskColor =   mSaveDate.getDateDefaultColor();
+        mDefaultTaskColor = mControlDataTask.getDateDefaultColor();
 
     }
 
-    @Override
+
     public boolean onCreateOptionsMenu(Menu menu) {
 
         getMenuInflater().inflate(R.menu.menu_new_task, menu);
@@ -69,13 +75,13 @@ public class NewTaskActivity extends AppCompatActivity {
                 String mTitle = mEditTextTitle.getText().toString();
                 String mDescription = mEditTextDescription.getText().toString();
 
-                Task mTask = new Task(mTitle, mDescription, defaultTaskColor, 0, 0);
+                Task mTask = new Task(mTitle, mDescription, mDefaultTaskColor, 0, 0);
 
                 Intent intent = new Intent();
                 intent.putExtra(KEY_SUBMIT_TASK, mTask);
 
-                if (position >= 0) {
-                    intent.putExtra(KEY_POSITION_ITEM, position);
+                if (mPosition >= 0) {
+                    intent.putExtra(KEY_POSITION_ITEM, mPosition);
                 }
                 setResult(RESULT_OK, intent);
 
@@ -83,7 +89,7 @@ public class NewTaskActivity extends AppCompatActivity {
 
                 return true;
 
-            case R.id.action_discard:
+            case android.R.id.home:
 
                 finish();
 
