@@ -9,8 +9,8 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
 import com.dadc.taskmanager.R;
+import com.dadc.taskmanager.prefChooserColorWidget.TaskPreferenceWidget;
 
-import yuku.ambilwarna.widget.AmbilWarnaPreference;
 
 /**
  * Created by bomko on 11.05.16.
@@ -33,12 +33,10 @@ public class SettingActivity extends AppCompatActivity {
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
         assert getSupportActionBar() != null;
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         mIntent = new Intent();
-
         getFragmentManager().beginTransaction().replace(R.id.content_frame, new TaskPreferenceFragment()).commit();
 
     }
@@ -47,9 +45,7 @@ public class SettingActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-
                 onBackPressed();
-
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -57,25 +53,22 @@ public class SettingActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-
         setResult(SETTING_RESULT_CODE, mIntent);
-
         super.onBackPressed();
     }
 
-
     public static class TaskPreferenceFragment extends PreferenceFragment {
 
-        AmbilWarnaPreference mColorDefault, mColorStart, mColorEnd;
+        TaskPreferenceWidget mColorDefault, mColorStart, mColorEnd;
 
         @Override
         public void onCreate(Bundle savedInstanceState) {
             super.onCreate(savedInstanceState);
             addPreferencesFromResource(R.xml.fragment_preference);
 
-            mColorDefault = (AmbilWarnaPreference) findPreference(KEY_COLOR_DEFAULT);
-            mColorStart = (AmbilWarnaPreference) findPreference(KEY_COLOR_START);
-            mColorEnd = (AmbilWarnaPreference) findPreference(KEY_COLOR_END);
+            mColorDefault = (TaskPreferenceWidget) findPreference(KEY_COLOR_DEFAULT);
+            mColorStart = (TaskPreferenceWidget) findPreference(KEY_COLOR_START);
+            mColorEnd = (TaskPreferenceWidget) findPreference(KEY_COLOR_END);
 
             Preference mPrefButton = findPreference(KEY_PREF_BUTTON);
 
@@ -83,9 +76,9 @@ public class SettingActivity extends AppCompatActivity {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
 
-                    mColorDefault.forceSetValue(getResources().getColor(R.color.colorDefaultTask));
-                    mColorStart.forceSetValue(getResources().getColor(R.color.colorStartTask));
-                    mColorEnd.forceSetValue(getResources().getColor(R.color.colorEndTask));
+                    mColorDefault.setColorDefault(getResources().getColor(R.color.colorDefaultTask));
+                    mColorStart.setColorDefault(getResources().getColor(R.color.colorStartTask));
+                    mColorEnd.setColorDefault(getResources().getColor(R.color.colorEndTask));
 
                     return true;
                 }

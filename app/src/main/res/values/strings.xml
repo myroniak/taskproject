@@ -1,5 +1,10 @@
 <resources>
     <string name="app_name">Менеджер завдань</string>
+    <string name="dialog_color_title">Виберіть колір</string>
+    <string name="dialog_color_neg">Відмінити</string>
+    <string name="dialog_color_pos">Добре</string>
+    <string name="dialog_color_custom">Кастом</string>
+    <string name="dialog_color_preset">Назад</string>
     <string name="main_activity_name">Поточні завдання</string>
     <string name="add_new_task">Додати</string>
     <string name="saveTask">Зберегти</string>

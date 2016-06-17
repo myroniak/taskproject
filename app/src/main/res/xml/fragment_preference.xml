@@ -1,29 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:android="http://schemas.android.com/apk/res/android">
 
     <PreferenceCategory
         android:title="@string/pref_title_category_first">
 
-        <yuku.ambilwarna.widget.AmbilWarnaPreference
+        <com.dadc.taskmanager.prefChooserColorWidget.TaskPreferenceWidget
             android:defaultValue="@color/colorDefaultTask"
             android:key="colorDateDefault"
             android:title="@string/pref_title_color_default"
-            app:supportsAlpha="false"/>
+            />
 
-        <yuku.ambilwarna.widget.AmbilWarnaPreference
+        <com.dadc.taskmanager.prefChooserColorWidget.TaskPreferenceWidget
             android:defaultValue="@color/colorStartTask"
             android:key="colorDateStart"
             android:title="@string/pref_title_color_start"
-            app:supportsAlpha="false"/>
+            />
 
-        <yuku.ambilwarna.widget.AmbilWarnaPreference
+        <com.dadc.taskmanager.prefChooserColorWidget.TaskPreferenceWidget
             android:defaultValue="@color/colorEndTask"
             android:key="colorDateEnd"
             android:title="@string/pref_title_color_end"
-            app:supportsAlpha="false"/>
-
+            />
     </PreferenceCategory>
 
     <PreferenceCategory

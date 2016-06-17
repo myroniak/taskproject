@@ -12,6 +12,5 @@
     <color name="colorDefaultTask">#d0f4b9</color>
     <color name="colorStartTask">#f6ffa6</color>
     <color name="colorEndTask">#ff7f7f</color>
-
     <color name="colorLightTextButton">#F0F4C3</color>
 </resources>
