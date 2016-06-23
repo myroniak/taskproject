@@ -5,6 +5,7 @@ import android.os.Parcelable;
 
 import java.util.Comparator;
 
+
 /**
  * Created by bomko on 27.05.16.
  */
@@ -20,13 +21,20 @@ public class Task implements Parcelable, Comparable<Task> {
 
     private boolean isSelected;
 
-
     public Task(String mTitle, String mDescription, int mTaskColor, long mStartDateTask, long mStopDateTask) {
         this.mTitle = mTitle;
         this.mDescription = mDescription;
         this.mTaskColor = mTaskColor;
         this.mStartDateTask = mStartDateTask;
         this.mStopDateTask = mStopDateTask;
+    }
+
+    public void setTitle(String title) {
+        mTitle = title;
+    }
+
+    public void setDescription(String description) {
+        mDescription = description;
     }
 
     public String getTitle() {

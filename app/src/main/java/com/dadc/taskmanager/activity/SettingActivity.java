@@ -9,7 +9,8 @@ import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
 import com.dadc.taskmanager.R;
-import com.dadc.taskmanager.prefChooserColorWidget.TaskPreferenceWidget;
+import com.dadc.taskmanager.preferenceWidgets.TaskPreferenceWidget;
+import com.dadc.taskmanager.preferenceWidgets.TimePreference;
 
 
 /**
@@ -21,7 +22,8 @@ public class SettingActivity extends AppCompatActivity {
     private static final String KEY_COLOR_DEFAULT = "colorDateDefault";
     private static final String KEY_COLOR_START = "colorDateStart";
     private static final String KEY_COLOR_END = "colorDateEnd";
-    private static final String KEY_PREF_BUTTON = "defaultButton";
+    private static final String KEY_PREF_DEFAULT = "defaultButton";
+    private static final String KEY_PREF_TIME = "setTimeAlarm";
     private static final int SETTING_RESULT_CODE = 2;
 
     Intent mIntent;
@@ -60,6 +62,7 @@ public class SettingActivity extends AppCompatActivity {
     public static class TaskPreferenceFragment extends PreferenceFragment {
 
         TaskPreferenceWidget mColorDefault, mColorStart, mColorEnd;
+        TimePreference mTimePreference;
 
         @Override
         public void onCreate(Bundle savedInstanceState) {
@@ -69,8 +72,9 @@ public class SettingActivity extends AppCompatActivity {
             mColorDefault = (TaskPreferenceWidget) findPreference(KEY_COLOR_DEFAULT);
             mColorStart = (TaskPreferenceWidget) findPreference(KEY_COLOR_START);
             mColorEnd = (TaskPreferenceWidget) findPreference(KEY_COLOR_END);
+            mTimePreference = (TimePreference) findPreference(KEY_PREF_TIME);
 
-            Preference mPrefButton = findPreference(KEY_PREF_BUTTON);
+            Preference mPrefButton = findPreference(KEY_PREF_DEFAULT);
 
             mPrefButton.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
@@ -79,6 +83,7 @@ public class SettingActivity extends AppCompatActivity {
                     mColorDefault.setColorDefault(getResources().getColor(R.color.colorDefaultTask));
                     mColorStart.setColorDefault(getResources().getColor(R.color.colorStartTask));
                     mColorEnd.setColorDefault(getResources().getColor(R.color.colorEndTask));
+                    mTimePreference.setDefaultTime(1, 0);
 
                     return true;
                 }

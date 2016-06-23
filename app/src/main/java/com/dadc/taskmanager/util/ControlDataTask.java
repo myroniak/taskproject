@@ -50,6 +50,7 @@ public class ControlDataTask {
     public void savePreferenceDataTask(ArrayList<Task> taskArrayList) {
 
         String jsonStr = mGson.toJson(taskArrayList);
+
         mEditor.putString(KEY_VALUE, jsonStr);
         mEditor.apply();
 
@@ -132,5 +133,4 @@ public class ControlDataTask {
             }
         }
     }
-
 }

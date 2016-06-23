@@ -1,25 +1,26 @@
 package com.dadc.taskmanager.activity;
 
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.CoordinatorLayout;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ListView;
 
 import com.dadc.taskmanager.R;
 import com.dadc.taskmanager.adapter.TaskAdapter;
 import com.dadc.taskmanager.dialog.ClearDialogFragment;
 import com.dadc.taskmanager.model.Task;
 import com.dadc.taskmanager.util.ControlDataTask;
+import com.daimajia.swipe.util.Attributes;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -30,22 +31,19 @@ public class MainActivity extends AppCompatActivity implements ClearDialogFragme
     private static final String KEY_SUBMIT_TASK = "submit_task";
     private static final String KEY_SAVE_INSTANCE = "save_instance";
     private static final String KEY_POSITION_ITEM = "position_item";
-    private static final String KEY_EDIT_ITEM = "edit_item";
-    private static final String KEY_TITLE_ACTIVITY = "title_edit_task";
     private static final int REQUEST_CODE_SETTING = 2;
     private static final int REQUEST_CODE_TASK = 1;
 
-    private AlertDialog.Builder mAlertDialogReloadDateTask;
-    private CoordinatorLayout mRelativeLayoutMainActivity;
-    private ListView mTaskListView;
+    private CoordinatorLayout mCoordinatorLayoutMain;
+    private RecyclerView mRecyclerView;
 
     private ArrayList<Task> mTaskArrayList;
     private TaskAdapter mTaskAdapter;
     private ControlDataTask mControlDataTask;
+    private FloatingActionButton mFloatingActionButton;
 
-    private int mDefaultTaskColor, mStartTaskColor, mEndTaskColor;
     private boolean mDoubleBackToExitPressedOnce = false;
-    MenuItem item1;
+    private int mDefaultTaskColor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,7 +79,7 @@ public class MainActivity extends AppCompatActivity implements ClearDialogFragme
     public boolean onOptionsItemSelected(MenuItem item) {
 
         int id = item.getItemId();
-        item1 = item;
+
         switch (id) {
             case R.id.action_a_z:
 
@@ -94,22 +92,18 @@ public class MainActivity extends AppCompatActivity implements ClearDialogFragme
 
                 Collections.sort(mTaskArrayList, Task.TaskReverseTitleComparator);
                 saveSortTask(item);
-
                 return true;
 
             case R.id.action_first_end:
 
                 Collections.sort(mTaskArrayList, Task.TaskDateComparator);
                 saveSortTask(item);
-
                 return true;
-
 
             case R.id.action_end_first:
 
                 Collections.sort(mTaskArrayList, Task.TaskReverseDateComparator);
                 saveSortTask(item);
-
                 return true;
 
             case R.id.action_setting:
@@ -117,7 +111,6 @@ public class MainActivity extends AppCompatActivity implements ClearDialogFragme
                 //Go to Setting activity
                 Intent intentSetting = new Intent(MainActivity.this, SettingActivity.class);
                 startActivityForResult(intentSetting, REQUEST_CODE_SETTING);
-
                 return true;
 
             case R.id.action_add:
@@ -125,14 +118,13 @@ public class MainActivity extends AppCompatActivity implements ClearDialogFragme
                 //Go to Task activity
                 Intent intent = new Intent(MainActivity.this, TaskActivity.class);
                 startActivityForResult(intent, REQUEST_CODE_TASK);
-
                 return true;
 
             case R.id.action_add_items:
 
                 addManyTasks();
-
                 return true;
+
             case R.id.action_delete_items:
 
                 //DialogFragment for clear Task data
@@ -143,8 +135,8 @@ public class MainActivity extends AppCompatActivity implements ClearDialogFragme
             case R.id.action_exit:
 
                 finish();
-
                 return true;
+
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -152,94 +144,46 @@ public class MainActivity extends AppCompatActivity implements ClearDialogFragme
 
     // initialize widget and adapter
     public void initUI() {
+
         mControlDataTask = new ControlDataTask(this);
 
         mDefaultTaskColor = mControlDataTask.getDateDefaultColor();
-        mStartTaskColor = mControlDataTask.getDateStartColor();
-        mEndTaskColor = mControlDataTask.getDateEndColor();
 
-        mRelativeLayoutMainActivity = (CoordinatorLayout) findViewById(R.id.relativeLayoutMainActivity);
-        mTaskListView = (ListView) findViewById(R.id.listViewTask);
+        mFloatingActionButton = (FloatingActionButton) findViewById(R.id.addNewTaskFAB);
+
+        mCoordinatorLayoutMain = (CoordinatorLayout) findViewById(R.id.relativeLayoutMainActivity);
+        mRecyclerView = (RecyclerView) findViewById(R.id.recyclerViewTask);
 
         mTaskArrayList = new ArrayList<>();
-        mTaskAdapter = new TaskAdapter(this, mTaskArrayList);
-        mTaskListView.setAdapter(mTaskAdapter);
+        mTaskAdapter = new TaskAdapter(mRecyclerView, this, mTaskArrayList);
 
+        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
+        mRecyclerView.setLayoutManager(mLayoutManager);
+        //  mTaskListView.addItemDecoration(new DividerItemDecoration(getResources().getDrawable(R.drawable.divider)));
+        mRecyclerView.setItemAnimator(new DefaultItemAnimator());
+
+        mTaskAdapter.setMode(Attributes.Mode.Single);
+        mRecyclerView.setAdapter(mTaskAdapter);
 
         // LoadData from SharedPreferences in Thread
         new Thread(new Runnable() {
             public void run() {
                 mTaskArrayList = mControlDataTask.loadPreferenceDataTask();
-                mTaskAdapter = new TaskAdapter(MainActivity.this, mTaskArrayList);
-                mTaskListView.setAdapter(mTaskAdapter);
+                mTaskAdapter = new TaskAdapter(mRecyclerView, MainActivity.this, mTaskArrayList);
+                mRecyclerView.setAdapter(mTaskAdapter);
             }
         }).start();
 
-        mTaskListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
-            public void onItemClick(AdapterView<?> av, final View v, final int position, long id) {
-                final Task mTask = mTaskAdapter.getItem(position);
-
-                //Get Start date on current item
-                long _mStartDate = mTaskAdapter.getItem(position).getStartDateTask();
-
-                //Get Stop date on current item
-                long _mStopDate = mTaskAdapter.getItem(position).getStopDateTask();
-
-                if (_mStartDate == 0) {
-                    mTask.setTaskColor(mStartTaskColor);
-                    mTaskArrayList.get(position).setSelected(true);
-
-                    //Set date to TextView after start
-                    mTask.setStartDateTask(startDateTask(position));
-
-                } else if (_mStopDate == 0) {
-                    mTask.setTaskColor(mEndTaskColor);
-                    mTaskArrayList.get(position).setSelected(true);
-
-                    //Set date to TextView after ending
-                    mTask.setStopDateTask(stopDateTask());
-
-                } else {
-
-                    //Reload dateTask
-                    mAlertDialogReloadDateTask = new AlertDialog.Builder(MainActivity.this);
-                    mAlertDialogReloadDateTask.setTitle(getResources().getString(R.string.titleAlertDialog));
-                    mAlertDialogReloadDateTask.setMessage(getResources().getString(R.string.messageAlertDialog));
-                    mAlertDialogReloadDateTask.setPositiveButton(getResources().getString(R.string.posBtnAlertDialog), new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int arg1) {
-                            mTask.setTaskColor(mStartTaskColor);
-                            mTaskArrayList.get(position).setSelected(true);
-
-                            //Set start date
-                            mTaskAdapter.getItem(position).setStartDateTask(startDateTask(position));
-                            mControlDataTask.savePreferenceDataTask(mTaskArrayList); //Save data in SharedPreferences
-                        }
-                    });
-                    mAlertDialogReloadDateTask.setNegativeButton(getResources().getString(R.string.negBtnAlertDialog), null);
-                    mAlertDialogReloadDateTask.setCancelable(false);
-                    mAlertDialogReloadDateTask.show();
-                }
-
-                mControlDataTask.savePreferenceDataTask(mTaskArrayList); //Save data in SharedPreferences
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                if (dy > 0)
+                    mFloatingActionButton.hide();
+                else if (dy < 0)
+                    mFloatingActionButton.show();
             }
         });
 
-        //Edit Task item
-        mTaskListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(final AdapterView<?> p, View v, final int position, long id) {
-
-                Task title = mTaskAdapter.getItem(position);
-                Intent intent = new Intent(MainActivity.this, TaskActivity.class);
-                intent.putExtra(KEY_EDIT_ITEM, title);
-                intent.putExtra(KEY_POSITION_ITEM, position);
-                intent.putExtra(KEY_TITLE_ACTIVITY, getResources().getString(R.string.activity_edit_task));
-                startActivityForResult(intent, REQUEST_CODE_TASK);
-
-                return true;
-            }
-        });
     }
 
 
@@ -250,47 +194,14 @@ public class MainActivity extends AppCompatActivity implements ClearDialogFragme
         startActivityForResult(intent, REQUEST_CODE_TASK);
     }
 
-
-    public long startDateTask(int position) {
-
-        openSnackbar(getResources().getString(R.string.titleStartTaskSnackBar));
-        mTaskAdapter.getItem(position).setStopDateTask(0);
-        mTaskAdapter.notifyDataSetChanged();
-
-        return System.currentTimeMillis();
-    }
-
-    public long stopDateTask() {
-
-        //Show state DateTask
-        openSnackbar(getResources().getString(R.string.titleEndTaskSnackBar));
-        mTaskAdapter.notifyDataSetChanged();
-
-        return System.currentTimeMillis();
-    }
-
-    //Calculation height item ListView
-    private int getHeightItemListView(ListView listView, TaskAdapter listAdapter) {
-
-        int heightItem;
-        View listItem = listAdapter.getView(0, null, listView);
-        listItem.measure(0, 0);
-        heightItem = listItem.getMeasuredHeight() + listView.getDividerHeight(); //ListView item height
-
-        return heightItem;
-    }
-
-    /*
-     * This method auto generated and include 3 times more task than fits on the screen.
-     */
     public void addManyTasks() {
 
         mTaskArrayList.add(0, new Task(getResources().getString(R.string.titleTask) + 1,
                 getResources().getString(R.string.descriptionTask) + 1,
                 mDefaultTaskColor, 0, 0));
 
-        float heightItemListView = getHeightItemListView(mTaskListView, mTaskAdapter);
-        float mTaskListViewHeight = mTaskListView.getHeight();
+        float heightItemListView = getHeightItemListView(mRecyclerView);
+        float mTaskListViewHeight = mRecyclerView.getHeight();
         int mCountItem = ((int) (mTaskListViewHeight / heightItemListView) * 3) - 1;
 
         for (int i = 0; i < mCountItem; i++) {
@@ -304,9 +215,9 @@ public class MainActivity extends AppCompatActivity implements ClearDialogFragme
         mControlDataTask.savePreferenceDataTask(mTaskArrayList); //Save data in SharedPreferences
     }
 
-
-    public void openSnackbar(CharSequence title) {
-        Snackbar.make(mRelativeLayoutMainActivity, title, Snackbar.LENGTH_LONG).show();
+    //Calculation height item ListView
+    private int getHeightItemListView(RecyclerView listView) {
+        return listView.getChildAt(0).getHeight();
     }
 
 
@@ -337,14 +248,13 @@ public class MainActivity extends AppCompatActivity implements ClearDialogFragme
 
             //Update color
             mDefaultTaskColor = mControlDataTask.getDateDefaultColor();
-            mStartTaskColor = mControlDataTask.getDateStartColor();
-            mEndTaskColor = mControlDataTask.getDateEndColor();
 
             mControlDataTask.updateColorDateTask(mTaskArrayList); //Update data in mTaskArrayList
 
         }
 
         mTaskAdapter.notifyDataSetChanged();
+
         mControlDataTask.savePreferenceDataTask(mTaskArrayList); //Save data in SharedPreferences
 
     }
@@ -379,4 +289,12 @@ public class MainActivity extends AppCompatActivity implements ClearDialogFragme
     public void clearTaskList() {
         mControlDataTask.clearPreferenceDataTask(mTaskArrayList, mTaskAdapter);
     }
+
+    public void openSnackbar(CharSequence title) {
+        Snackbar.make(mCoordinatorLayoutMain, title, Snackbar.LENGTH_LONG
+
+        ).show();
+
+    }
+
 }

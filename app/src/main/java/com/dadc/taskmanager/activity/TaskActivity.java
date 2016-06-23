@@ -2,10 +2,17 @@ package com.dadc.taskmanager.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.speech.RecognizerIntent;
+import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.WindowManager;
 import android.widget.EditText;
 
 import com.dadc.taskmanager.R;
@@ -21,9 +28,11 @@ public class TaskActivity extends AppCompatActivity {
     private static final String KEY_POSITION_ITEM = "position_item";
     private static final String KEY_EDIT_ITEM = "edit_item";
     private static final String KEY_TITLE_ACTIVITY = "title_edit_task";
-
+    int REQUEST_CODE_TITLE = 5;
+    int REQUEST_CODE_DESCRIPTION = 6;
     private EditText mEditTextTitle, mEditTextDescription;
     private int mPosition, mDefaultTaskColor;
+    TextInputLayout inputLayoutTitle, inputLayoutDesc;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +55,13 @@ public class TaskActivity extends AppCompatActivity {
         mPosition = getIntent().getIntExtra(KEY_POSITION_ITEM, -1);
         String mTitleActivity = getIntent().getStringExtra(KEY_TITLE_ACTIVITY);
 
+
+        inputLayoutTitle = (TextInputLayout) findViewById(R.id.input_layout_title);
+        inputLayoutDesc = (TextInputLayout) findViewById(R.id.input_layout_desc);
+
+        mEditTextTitle.addTextChangedListener(new MyTextWatcher(inputLayoutTitle));
+        mEditTextDescription.addTextChangedListener(new MyTextWatcher(mEditTextDescription));
+
         if (mTaskEdit != null) {
             mEditTextTitle.setText(mTaskEdit.getTitle());
             mEditTextDescription.setText(mTaskEdit.getDescription());
@@ -56,6 +72,49 @@ public class TaskActivity extends AppCompatActivity {
 
         mDefaultTaskColor = mControlDataTask.getDateDefaultColor();
 
+        //Input voice Title
+        mEditTextTitle.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+
+                final int DRAWABLE_RIGHT = 2;
+
+                if (event.getAction() == MotionEvent.ACTION_UP) {
+                    if (event.getRawX() >= (mEditTextTitle.getRight() - mEditTextTitle.getCompoundDrawables()[DRAWABLE_RIGHT].getBounds().width())) {
+
+                        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+                        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+
+                        startActivityForResult(intent, REQUEST_CODE_TITLE);
+                        return true;
+                    }
+                }
+                return false;
+            }
+        });
+
+
+        //Input voice Description
+        mEditTextDescription.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+
+                final int DRAWABLE_RIGHT = 2;
+
+                if (event.getAction() == MotionEvent.ACTION_UP) {
+                    if (event.getRawX() >= (mEditTextDescription.getRight() - mEditTextDescription.getCompoundDrawables()[DRAWABLE_RIGHT].getBounds().width())) {
+
+                        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+                        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+
+                        startActivityForResult(intent, REQUEST_CODE_DESCRIPTION);
+
+                        return true;
+                    }
+                }
+                return false;
+            }
+        });
     }
 
 
@@ -66,26 +125,26 @@ public class TaskActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_CODE_TITLE && resultCode == RESULT_OK) {
+
+            mEditTextTitle.setText(data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS).get(0));
+
+        } else if (requestCode == REQUEST_CODE_DESCRIPTION && resultCode == RESULT_OK) {
+
+            mEditTextDescription.setText(data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS).get(0));
+        }
+
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
 
             case R.id.action_done:
 
-                // get String form editText: title, description
-                String mTitle = mEditTextTitle.getText().toString();
-                String mDescription = mEditTextDescription.getText().toString();
-
-                Task mTask = new Task(mTitle, mDescription, mDefaultTaskColor, 0, 0);
-
-                Intent intent = new Intent();
-                intent.putExtra(KEY_SUBMIT_TASK, mTask);
-
-                if (mPosition >= 0) {
-                    intent.putExtra(KEY_POSITION_ITEM, mPosition);
-                }
-                setResult(RESULT_OK, intent);
-
-                finish();
+                submitForm();
 
                 return true;
 
@@ -98,6 +157,98 @@ public class TaskActivity extends AppCompatActivity {
             default:
                 return true;
         }
+
+
     }
 
+    private void submitForm() {
+        String mTitle = mEditTextTitle.getText().toString();
+        String mDescription = mEditTextDescription.getText().toString();
+
+        if (validateTitle() && validateDesc()) {
+
+            Task mTask = new Task(mTitle, mDescription, mDefaultTaskColor, 0, 0);
+
+            Intent intent = new Intent();
+            intent.putExtra(KEY_SUBMIT_TASK, mTask);
+
+            if (mPosition >= 0) {
+                intent.putExtra(KEY_POSITION_ITEM, mPosition);
+            }
+
+            setResult(RESULT_OK, intent);
+            finish();
+
+        }
+    }
+
+    private boolean validateTitle() {
+        String mTitle = mEditTextTitle.getText().toString();
+        inputLayoutTitle.setError(null);
+        if (mTitle.length() <= 4) {
+            inputLayoutTitle.setErrorEnabled(true);
+            requestFocus(mEditTextTitle);
+            inputLayoutTitle.setError("Поле порожне або немає 5 символів.");
+
+            return false;
+
+        } else {
+            inputLayoutTitle.setErrorEnabled(false);
+        }
+
+        return true;
+    }
+
+    private boolean validateDesc() {
+
+        String mDescription = mEditTextDescription.getText().toString();
+        inputLayoutDesc.setError(null);
+
+        if (mDescription.length() == 0) {
+            requestFocus(mEditTextDescription);
+            inputLayoutDesc.setErrorEnabled(true);
+            inputLayoutDesc.setError("Це поле не може бути порожнім.");
+            return false;
+
+        } else {
+            inputLayoutDesc.setErrorEnabled(false);
+        }
+        return true;
+    }
+
+    private void requestFocus(View view) {
+
+        if (view.requestFocus()) {
+            getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+        }
+    }
+
+
+    private class MyTextWatcher implements TextWatcher {
+
+        private View view;
+
+        private MyTextWatcher(View view) {
+            this.view = view;
+        }
+
+        public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+        }
+
+        public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+        }
+
+        public void afterTextChanged(Editable editable) {
+            switch (view.getId()) {
+                case R.id.titleEditText:
+                    validateTitle();
+                    break;
+                case R.id.descriptionEditText:
+                    validateDesc();
+                    break;
+
+            }
+        }
+    }
 }

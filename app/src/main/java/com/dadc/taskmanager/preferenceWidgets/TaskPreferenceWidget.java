@@ -1,4 +1,4 @@
-package com.dadc.taskmanager.prefChooserColorWidget;
+package com.dadc.taskmanager.preferenceWidgets;
 
 import android.content.Context;
 import android.content.res.TypedArray;

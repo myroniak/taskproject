@@ -5,19 +5,19 @@
     <PreferenceCategory
         android:title="@string/pref_title_category_first">
 
-        <com.dadc.taskmanager.prefChooserColorWidget.TaskPreferenceWidget
+        <com.dadc.taskmanager.preferenceWidgets.TaskPreferenceWidget
             android:defaultValue="@color/colorDefaultTask"
             android:key="colorDateDefault"
             android:title="@string/pref_title_color_default"
             />
 
-        <com.dadc.taskmanager.prefChooserColorWidget.TaskPreferenceWidget
+        <com.dadc.taskmanager.preferenceWidgets.TaskPreferenceWidget
             android:defaultValue="@color/colorStartTask"
             android:key="colorDateStart"
             android:title="@string/pref_title_color_start"
             />
 
-        <com.dadc.taskmanager.prefChooserColorWidget.TaskPreferenceWidget
+        <com.dadc.taskmanager.preferenceWidgets.TaskPreferenceWidget
             android:defaultValue="@color/colorEndTask"
             android:key="colorDateEnd"
             android:title="@string/pref_title_color_end"
@@ -26,11 +26,18 @@
 
     <PreferenceCategory
         android:title="@string/pref_title_category_second">
+        <com.dadc.taskmanager.preferenceWidgets.TimePreference
+            android:defaultValue="3600000"
+            android:key="setTimeAlarm"
+            android:title="@string/pref_title_max_time"/>
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/pref_title_category_third">
         <Preference
             android:key="defaultButton"
             android:summary="@string/pref_summary_set_default_value"
             android:title="@string/pref_title_set_default_value"/>
-
     </PreferenceCategory>
 
 </PreferenceScreen>

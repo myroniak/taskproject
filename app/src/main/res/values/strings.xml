@@ -19,6 +19,8 @@
     <string name="posBtnAlertDialog">ТАК</string>
     <string name="negBtnAlertDialog">НІ</string>
     <string name="titleStartTaskSnackBar">Початок завдання!</string>
+    <string name="titleResetTaskSnackBar">Завдання скинуто!</string>
+    <string name="titleResetEndTaskSnackBar">Завдання продовжено!</string>
     <string name="titleExitTwice">Натисніть ще раз для виходу</string>
     <string name="titleEndTaskSnackBar">Кінець завдання!</string>
     <string name="fullFormat">dd.MM.yyyy HH:mm</string>
@@ -51,10 +53,14 @@
 
     <string name="pref_title_color_default">Неактивне</string>
     <string name="pref_title_color_start">Активне</string>
+    <string name="pref_pos_set_time">Встановити</string>
+    <string name="pref_neg_set_time">Відмінити</string>
     <string name="pref_title_color_end">Закінчене</string>
     <string name="pref_title_category_first">Кольори станів завдання</string>
-    <string name="pref_title_category_second">Інше</string>
+    <string name="pref_title_category_third">Інше</string>
+    <string name="pref_title_category_second">Термін виконання завдання</string>
+    <string name="pref_title_max_time">Максимальний час</string>
     <string name="pref_title_set_default_value">Відновити налаштування</string>
-    <string name="pref_summary_set_default_value">Встановлює стандартні значення кольорів</string>
+    <string name="pref_summary_set_default_value">Встановлює всі значення за замовчуванням</string>
 
 </resources>
