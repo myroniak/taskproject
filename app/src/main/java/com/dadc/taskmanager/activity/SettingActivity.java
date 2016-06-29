@@ -23,7 +23,7 @@ public class SettingActivity extends AppCompatActivity {
     private static final String KEY_COLOR_START = "colorDateStart";
     private static final String KEY_COLOR_END = "colorDateEnd";
     private static final String KEY_PREF_DEFAULT = "defaultButton";
-    private static final String KEY_PREF_TIME = "setTimeAlarm";
+    private static final String KEY_PREF_TIME = "timeAlarm";
     private static final int SETTING_RESULT_CODE = 2;
 
     Intent mIntent;

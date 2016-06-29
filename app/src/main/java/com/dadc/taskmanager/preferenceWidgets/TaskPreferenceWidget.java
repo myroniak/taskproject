@@ -115,12 +115,6 @@ public class TaskPreferenceWidget extends Preference {
     }
 
 
-    /**
-     * SavedState, a subclass of {@link BaseSavedState}, will store the state
-     * of MyPreference, a subclass of Preference.
-     * <p/>
-     * It is important to always call through to super methods.
-     */
     private static class SavedState extends BaseSavedState {
         int value;
 

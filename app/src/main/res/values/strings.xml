@@ -18,11 +18,6 @@
     <string name="messageAlertDialogClear">Ви дійсно хочете видалити всі записи?</string>
     <string name="posBtnAlertDialog">ТАК</string>
     <string name="negBtnAlertDialog">НІ</string>
-    <string name="titleStartTaskSnackBar">Початок завдання!</string>
-    <string name="titleResetTaskSnackBar">Завдання скинуто!</string>
-    <string name="titleResetEndTaskSnackBar">Завдання продовжено!</string>
-    <string name="titleExitTwice">Натисніть ще раз для виходу</string>
-    <string name="titleEndTaskSnackBar">Кінець завдання!</string>
     <string name="fullFormat">dd.MM.yyyy HH:mm</string>
     <string name="shortFormat">HH:mm:ss</string>
     <string name="timeZone">GMT</string>
@@ -62,5 +57,22 @@
     <string name="pref_title_max_time">Максимальний час</string>
     <string name="pref_title_set_default_value">Відновити налаштування</string>
     <string name="pref_summary_set_default_value">Встановлює всі значення за замовчуванням</string>
+
+    <!--Notification -->
+
+    <string name="content_text">Завдання автоматично завершене</string>
+
+    <!-- Snackbar -->
+
+    <string name="titleStartTaskSnackBar">Початок завдання!</string>
+    <string name="titleResetTaskSnackBar">Завдання скинуто!</string>
+    <string name="titleResetEndTaskSnackBar">Завдання продовжено!</string>
+    <string name="titleExitTwice">Натисніть ще раз для виходу</string>
+    <string name="titleEndTaskSnackBar">Кінець завдання!</string>
+    <string name="title_task_end">Завдання вже завершено</string>
+    <string name="title_task_start">Завдання вже розпочато</string>
+    <string name="title_task_no_start">Завдання не розпочато</string>
+
+
 
 </resources>

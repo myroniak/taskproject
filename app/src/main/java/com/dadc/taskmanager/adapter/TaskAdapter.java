@@ -10,6 +10,7 @@ import android.preference.PreferenceManager;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,20 +35,23 @@ public class TaskAdapter extends RecyclerSwipeAdapter<TaskAdapter.MyViewHolder> 
     private static final String KEY_POSITION_ITEM = "position_item";
     private static final String KEY_EDIT_ITEM = "edit_item";
     private static final String KEY_TITLE_ACTIVITY = "title_edit_task";
+    private static final String KEY_TITLE = "title";
+    private static final String KEY_POSITION = "position";
+    private static final String KEY_ALARM_TIME = "timeAlarm";
+    private static final String KEY_ACTION = "action";
     private static final int REQUEST_CODE_TASK = 1;
-    private ControlDataTask mControlDataTask;
 
-    private int mStartTaskColor, mEndTaskColor, mDefaultTaskColor;
+    private ControlDataTask mControlDataTask;
     private ArrayList<Task> mTaskArrayList;
     private Context mContext;
     private DateFormat mDateFormatFull, mDateFormatShort;
     private String mStartDate, mStopDate, mElapsedDate;
     private Resources mResources;
-    private RecyclerView mRecyclerView;
     private AlarmManager mAlarmManager;
+    private PendingIntent mAlarmSender;
 
-    long time;
-
+    private int mStartTaskColor, mEndTaskColor, mDefaultTaskColor;
+    private long time;
 
     public class MyViewHolder extends RecyclerView.ViewHolder {
         ImageButton mButtonStart, mButtonStop, mSwipeReset;
@@ -75,17 +79,13 @@ public class TaskAdapter extends RecyclerSwipeAdapter<TaskAdapter.MyViewHolder> 
         }
     }
 
-    public TaskAdapter(ArrayList<Task> mTaskArrayList) {
-        this.mTaskArrayList = mTaskArrayList;
-    }
 
-    public TaskAdapter(RecyclerView mRecyclerView, Context mContext, ArrayList<Task> mTaskArrayList) {
-        this.mRecyclerView = mRecyclerView;
+    public TaskAdapter(Context mContext, ArrayList<Task> mTaskArrayList) {
         this.mContext = mContext;
         this.mTaskArrayList = mTaskArrayList;
 
-        mAlarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
 
+        mAlarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
     }
 
     @Override
@@ -186,34 +186,44 @@ public class TaskAdapter extends RecyclerSwipeAdapter<TaskAdapter.MyViewHolder> 
         holder.mButtonStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (getItem(position).getStartDateTask() == 0) {
 
-                openSnackbar(mRecyclerView, mResources.getString(R.string.titleStartTaskSnackBar));
+                    openSnackbar(holder.swipeLayout, mResources.getString(R.string.titleStartTaskSnackBar));
 
-                Intent intent = createIntent("action" + position, mTaskArrayList.get(position).getTitle(), position);
-                PendingIntent mAlarmSender = PendingIntent.getBroadcast(mContext, position, intent, 0);
+                    setNotification(position);
+                    //Start task
+                    getItem(position).setTaskColor(mStartTaskColor);
+                    getItem(position).setSelected(true);
+                    //Set date to TextView after start
+                    getItem(position).setStartDateTask(startDateTask(position));
+                    mControlDataTask.savePreferenceDataTask(mTaskArrayList); //Save data in SharedPreferences
+                } else if (getItem(position).getStopDateTask() != 0) {
 
-                mAlarmManager.set(AlarmManager.RTC, System.currentTimeMillis() + 5000, mAlarmSender);
+                    openSnackbar(holder.swipeLayout, mContext.getResources().getString(R.string.title_task_end));
 
-                SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
-                time = preferences.getLong("setTimeAlarm", 0);
+                } else {
 
-                //Start task
-                getItem(position).setTaskColor(mStartTaskColor);
-                getItem(position).setSelected(true);
-                //Set date to TextView after start
-                getItem(position).setStartDateTask(startDateTask(position));
-                mControlDataTask.savePreferenceDataTask(mTaskArrayList); //Save data in SharedPreferences
+                    openSnackbar(holder.swipeLayout, mContext.getResources().getString(R.string.title_task_start));
 
+
+                }
             }
         });
 
         holder.mButtonStop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (getItem(position).getStopDateTask() == 0) {
 
-                openSnackbar(mRecyclerView, mResources.getString(R.string.titleEndTaskSnackBar));
-                stopDateTask(position, mEndTaskColor);
-                mControlDataTask.savePreferenceDataTask(mTaskArrayList); //Save data in SharedPreferences
+                    openSnackbar(holder.swipeLayout, mResources.getString(R.string.titleEndTaskSnackBar));
+
+                    stopDateTask(position);
+
+                    stopAlarmManager();
+                } else {
+
+                    openSnackbar(holder.swipeLayout, mResources.getString(R.string.title_task_end));
+                }
 
             }
         });
@@ -227,6 +237,8 @@ public class TaskAdapter extends RecyclerSwipeAdapter<TaskAdapter.MyViewHolder> 
                 intent.putExtra(KEY_POSITION_ITEM, position);
                 intent.putExtra(KEY_TITLE_ACTIVITY, mResources.getString(R.string.activity_edit_task));
                 ((AppCompatActivity) mContext).startActivityForResult(intent, REQUEST_CODE_TASK);
+
+                stopAlarmManager();
             }
         });
 
@@ -241,6 +253,7 @@ public class TaskAdapter extends RecyclerSwipeAdapter<TaskAdapter.MyViewHolder> 
 
                 mControlDataTask.savePreferenceDataTask(mTaskArrayList); //Save data in SharedPreferences
 
+                stopAlarmManager();
             }
         });
 
@@ -248,38 +261,63 @@ public class TaskAdapter extends RecyclerSwipeAdapter<TaskAdapter.MyViewHolder> 
             @Override
             public void onClick(View v) {
 
-                openSnackbar(mRecyclerView, mResources.getString(R.string.titleResetTaskSnackBar));
+                openSnackbar(holder.swipeLayout, mResources.getString(R.string.titleResetTaskSnackBar));
+                if (getItem(position).getStopDateTask() == 0 && getItem(position).getStartDateTask() != 0) {
+                    //Start task
+                    getItem(position).setTaskColor(mDefaultTaskColor);
+                    getItem(position).setSelected(false);
 
-                //Start task
-                getItem(position).setTaskColor(mDefaultTaskColor);
-                getItem(position).setSelected(false);
+                    //Set date to TextView after ending
+                    getItem(position).setStopDateTask(0);
+                    getItem(position).setStartDateTask(0);
+                    mItemManger.removeShownLayouts(holder.swipeLayout);
+                    mItemManger.closeAllItems();
 
-                //Set date to TextView after ending
-                getItem(position).setStopDateTask(0);
-                getItem(position).setStartDateTask(0);
-                mItemManger.closeAllItems();
-
-                notifyDataSetChanged();
-
-                mControlDataTask.savePreferenceDataTask(mTaskArrayList); //Save data in SharedPreferences
+                    notifyDataSetChanged();
 
 
+                    mControlDataTask.savePreferenceDataTask(mTaskArrayList); //Save data in SharedPreferences
+                } else if (getItem(position).getStopDateTask() != 0) {
+
+                    openSnackbar(holder.swipeLayout, mContext.getResources().getString(R.string.title_task_end));
+
+                } else {
+
+                    openSnackbar(holder.swipeLayout, mContext.getResources().getString(R.string.title_task_no_start));
+
+
+                }
             }
         });
 
         holder.mSwipeResetEnd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (getItem(position).getStopDateTask() != 0) {
 
-                openSnackbar(mRecyclerView, mResources.getString(R.string.titleResetEndTaskSnackBar));
-                getItem(position).setTaskColor(mStartTaskColor);
-                getItem(position).setSelected(true);
-                getItem(position).setStopDateTask(0);
-                mItemManger.closeAllItems();
-                notifyDataSetChanged();
 
-                mControlDataTask.savePreferenceDataTask(mTaskArrayList); //Save data in SharedPreferences
+                    setNotification(position);
 
+                    openSnackbar(holder.swipeLayout, mResources.getString(R.string.titleResetEndTaskSnackBar));
+                    getItem(position).setTaskColor(mStartTaskColor);
+                    getItem(position).setSelected(true);
+                    getItem(position).setStopDateTask(0);
+                    mItemManger.removeShownLayouts(holder.swipeLayout);
+                    mItemManger.closeAllItems();
+                    notifyDataSetChanged();
+
+
+                    mControlDataTask.savePreferenceDataTask(mTaskArrayList); //Save data in SharedPreferences
+                } else if (getItem(position).getStartDateTask() != 0) {
+
+                    openSnackbar(holder.swipeLayout, mContext.getResources().getString(R.string.title_task_start));
+
+                } else {
+
+                    openSnackbar(holder.swipeLayout, mContext.getResources().getString(R.string.title_task_no_start));
+
+
+                }
             }
         });
 
@@ -296,13 +334,13 @@ public class TaskAdapter extends RecyclerSwipeAdapter<TaskAdapter.MyViewHolder> 
     }
 
 
-    public void stopDateTask(int position, int mEndTaskColor) {
+    public void stopDateTask(int position) {
 
+        mControlDataTask = new ControlDataTask(mContext);
         if (getItem(position).getStartDateTask() != 0) {
 
             getItem(position).setTaskColor(mEndTaskColor);
             getItem(position).setSelected(true);
-
             getItem(position).setStopDateTask(System.currentTimeMillis());
             notifyDataSetChanged();
 
@@ -310,23 +348,50 @@ public class TaskAdapter extends RecyclerSwipeAdapter<TaskAdapter.MyViewHolder> 
 
         }
         notifyDataSetChanged();
+
     }
 
+
+    public void openSnackbar(SwipeLayout rv, CharSequence title) {
+        Snackbar.make(rv, title, Snackbar.LENGTH_SHORT).show();
+    }
+
+    public Intent createIntent(String action, String title, int position) {
+
+        Intent mIntent = new Intent(mContext, Receiver.class);
+        mIntent.setAction(action);
+        mIntent.putExtra(KEY_TITLE, title);
+        mIntent.putExtra(KEY_POSITION, position);
+
+        return mIntent;
+    }
+
+    public void setNotification(int mPosition) {
+
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(mContext);
+        time = preferences.getLong(KEY_ALARM_TIME, 0);
+
+        Intent mIntent = createIntent(KEY_ACTION + mPosition, mTaskArrayList.get(mPosition).getTitle(), mPosition);
+
+        mAlarmSender = PendingIntent.getBroadcast(mContext, mPosition, mIntent, 0);
+
+        mAlarmManager.setExact(AlarmManager.RTC, System.currentTimeMillis() + time, mAlarmSender);
+
+        Log.d("myLog","time:" + time);
+
+    }
+
+    public void stopAlarmManager() {
+
+        if (mAlarmSender != null) {
+            mAlarmManager.cancel(mAlarmSender);
+        }
+
+    }
 
     @Override
     public int getSwipeLayoutResourceId(int position) {
         return R.id.swipe;
     }
 
-    public void openSnackbar(RecyclerView rv, CharSequence title) {
-        Snackbar.make(rv, title, Snackbar.LENGTH_SHORT).show();
-    }
-
-    Intent createIntent(String action, String extra, int position) {
-        Intent intent = new Intent(mContext, Receiver.class);
-        intent.setAction(action);
-        intent.putExtra("extra", extra);
-        intent.putExtra("position", position);
-        return intent;
-    }
 }

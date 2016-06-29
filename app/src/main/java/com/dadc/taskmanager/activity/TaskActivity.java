@@ -59,7 +59,7 @@ public class TaskActivity extends AppCompatActivity {
         inputLayoutTitle = (TextInputLayout) findViewById(R.id.input_layout_title);
         inputLayoutDesc = (TextInputLayout) findViewById(R.id.input_layout_desc);
 
-        mEditTextTitle.addTextChangedListener(new MyTextWatcher(inputLayoutTitle));
+        mEditTextTitle.addTextChangedListener(new MyTextWatcher(mEditTextTitle));
         mEditTextDescription.addTextChangedListener(new MyTextWatcher(mEditTextDescription));
 
         if (mTaskEdit != null) {

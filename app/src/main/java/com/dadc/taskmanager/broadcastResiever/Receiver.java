@@ -6,56 +6,42 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Build;
 
 import com.dadc.taskmanager.R;
 import com.dadc.taskmanager.activity.MainActivity;
-import com.dadc.taskmanager.adapter.TaskAdapter;
-import com.dadc.taskmanager.model.Task;
-import com.dadc.taskmanager.util.ControlDataTask;
-
-import java.util.ArrayList;
 
 public class Receiver extends BroadcastReceiver {
 
-    NotificationManager nm;
-    TaskAdapter mTaskAdapter;
+    private static final String KEY_TITLE = "title";
+    private static final String KEY_POSITION = "position";
+
+    private NotificationManager mNotificationManager;
+    private String mTitle;
+    private int mPosition;
 
     @Override
-    public void onReceive(final Context ctx, Intent intent) {
+    public void onReceive(final Context mContext, Intent mParentIntent) {
+
+        mTitle = mParentIntent.getStringExtra(KEY_TITLE);
+        mPosition = mParentIntent.getIntExtra(KEY_POSITION, 0);
+
+        mNotificationManager = (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
+
+        Intent mIntent = new Intent(mContext, MainActivity.class);
+        PendingIntent mPendingIntent = PendingIntent.getActivity(mContext, mPosition, mIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
 
-        ControlDataTask mControlDataTask = new ControlDataTask(ctx);
+        Notification.Builder mNotificationBuilder = new Notification.Builder(mContext);
 
-        ArrayList<Task> mTaskArrayList = mControlDataTask.loadPreferenceDataTask();
-        int mEndTaskColor = mControlDataTask.getDateEndColor();
+        mNotificationBuilder.setAutoCancel(true);
+        mNotificationBuilder.setContentTitle(mTitle);
+        mNotificationBuilder.setContentText(mContext.getResources().getString(R.string.content_text));
+        mNotificationBuilder.setSmallIcon(R.mipmap.ic_launcher);
+        mNotificationBuilder.setContentIntent(mPendingIntent);
 
-        int pos = intent.getIntExtra("position", 0);
+        MainActivity.mTaskAdapter.stopDateTask(mPosition);
 
-        Intent mIntent = new Intent(ctx, MainActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(ctx, 100, mIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-        nm = (NotificationManager) ctx.getSystemService(ctx.NOTIFICATION_SERVICE);
-
-        Notification.Builder builder = new Notification.Builder(ctx);
-
-        builder.setAutoCancel(true);
-        builder.setContentTitle(intent.getStringExtra("extra"));
-        builder.setContentText("Завдання автоматично завершене");
-        builder.setSmallIcon(R.mipmap.ic_launcher);
-        builder.setContentIntent(pendingIntent);
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            builder.build();
-        }
-
-        mTaskAdapter = new TaskAdapter(mTaskArrayList);
-        mTaskAdapter.stopDateTask(pos, mEndTaskColor);
-        mTaskAdapter.notifyDataSetChanged();
-        mControlDataTask.savePreferenceDataTask(mTaskArrayList); //Save data in SharedPreferences
-
-        Notification myNotification = builder.getNotification();
-        nm.notify(pos, myNotification);
+        mNotificationManager.notify(mPosition, mNotificationBuilder.build());
 
     }
 

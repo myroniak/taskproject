@@ -28,7 +28,7 @@
         android:title="@string/pref_title_category_second">
         <com.dadc.taskmanager.preferenceWidgets.TimePreference
             android:defaultValue="3600000"
-            android:key="setTimeAlarm"
+            android:key="timeAlarm"
             android:title="@string/pref_title_max_time"/>
     </PreferenceCategory>
 

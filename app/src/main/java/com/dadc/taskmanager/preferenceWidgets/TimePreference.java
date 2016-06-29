@@ -19,6 +19,7 @@ import java.util.concurrent.TimeUnit;
 public class TimePreference extends DialogPreference {
     private Calendar calendar;
     private TimePicker picker = null;
+    public static final String TIMEZONE = "GMT";
 
     public TimePreference(Context ctxt) {
         this(ctxt, null);
@@ -33,7 +34,7 @@ public class TimePreference extends DialogPreference {
 
         setPositiveButtonText(R.string.pref_pos_set_time);
         setNegativeButtonText(R.string.pref_neg_set_time);
-        calendar = new GregorianCalendar(TimeZone.getTimeZone("GMT"));
+        calendar = new GregorianCalendar(TimeZone.getTimeZone(TIMEZONE));
     }
 
     @Override

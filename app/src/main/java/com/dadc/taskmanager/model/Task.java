@@ -19,6 +19,15 @@ public class Task implements Parcelable, Comparable<Task> {
     private long mStopDateTask;
     private int mTaskColor;
 
+    public boolean getIsStart() {
+        return isStart;
+    }
+
+    public void setIsStart(boolean isStart) {
+        this.isStart = isStart;
+    }
+
+    private boolean isStart;
     private boolean isSelected;
 
     public Task(String mTitle, String mDescription, int mTaskColor, long mStartDateTask, long mStopDateTask) {

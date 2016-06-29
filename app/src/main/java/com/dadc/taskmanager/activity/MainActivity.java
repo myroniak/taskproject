@@ -34,11 +34,12 @@ public class MainActivity extends AppCompatActivity implements ClearDialogFragme
     private static final int REQUEST_CODE_SETTING = 2;
     private static final int REQUEST_CODE_TASK = 1;
 
+    public static TaskAdapter mTaskAdapter;
+
     private CoordinatorLayout mCoordinatorLayoutMain;
-    private RecyclerView mRecyclerView;
+    public RecyclerView mRecyclerView;
 
     private ArrayList<Task> mTaskArrayList;
-    private TaskAdapter mTaskAdapter;
     private ControlDataTask mControlDataTask;
     private FloatingActionButton mFloatingActionButton;
 
@@ -155,7 +156,7 @@ public class MainActivity extends AppCompatActivity implements ClearDialogFragme
         mRecyclerView = (RecyclerView) findViewById(R.id.recyclerViewTask);
 
         mTaskArrayList = new ArrayList<>();
-        mTaskAdapter = new TaskAdapter(mRecyclerView, this, mTaskArrayList);
+        mTaskAdapter = new TaskAdapter(this, mTaskArrayList);
 
         RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
         mRecyclerView.setLayoutManager(mLayoutManager);
@@ -169,7 +170,7 @@ public class MainActivity extends AppCompatActivity implements ClearDialogFragme
         new Thread(new Runnable() {
             public void run() {
                 mTaskArrayList = mControlDataTask.loadPreferenceDataTask();
-                mTaskAdapter = new TaskAdapter(mRecyclerView, MainActivity.this, mTaskArrayList);
+                mTaskAdapter = new TaskAdapter(MainActivity.this, mTaskArrayList);
                 mRecyclerView.setAdapter(mTaskAdapter);
             }
         }).start();
@@ -244,7 +245,7 @@ public class MainActivity extends AppCompatActivity implements ClearDialogFragme
                 mTaskArrayList.add(0, myTask);
             }
 
-        } else if (resultCode == REQUEST_CODE_SETTING) {
+        } else if (requestCode == REQUEST_CODE_SETTING) {
 
             //Update color
             mDefaultTaskColor = mControlDataTask.getDateDefaultColor();
