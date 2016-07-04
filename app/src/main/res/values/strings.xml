@@ -7,35 +7,36 @@
     <string name="dialog_color_preset">Назад</string>
     <string name="main_activity_name">Поточні завдання</string>
     <string name="add_new_task">Додати</string>
-    <string name="saveTask">Зберегти</string>
+    <string name="save_task">Зберегти</string>
     <string name="exit">Вихід</string>
     <string name="activity_no_result">Activity no return result </string>
     <string name="title">Назва</string>
     <string name="description">Коментар</string>
-    <string name="titleAlertDialog">Це завдання вже виконано!</string>
-    <string name="titleAlertDialogClear">Увага!</string>
-    <string name="messageAlertDialog">Почати його знову ?</string>
-    <string name="messageAlertDialogClear">Ви дійсно хочете видалити всі записи?</string>
-    <string name="posBtnAlertDialog">ТАК</string>
-    <string name="negBtnAlertDialog">НІ</string>
-    <string name="fullFormat">dd.MM.yyyy HH:mm</string>
-    <string name="shortFormat">HH:mm:ss</string>
-    <string name="timeZone">GMT</string>
-    <string name="noSetDate">"**.**.**** **:**"</string>
+    <string name="title_alert">Це завдання вже виконано!</string>
+    <string name="title_alert_clear">Увага!</string>
+    <string name="message_alert">Почати його знову ?</string>
+    <string name="message_alert_clear">Ви дійсно хочете видалити всі записи?</string>
+    <string name="pos_btn_alert">ТАК</string>
+    <string name="neg_btn_alert">НІ</string>
+    <string name="full_format">dd.MM.yyyy HH:mm</string>
+    <string name="short_format">HH:mm:ss</string>
+    <string name="time_zone">GMT</string>
+    <string name="no_set_date">"**.**.**** **:**"</string>
     <string name="hyphen">" - "</string>
-    <string name="spaceValue">"\u0020"</string>
-    <string name="titleTask">"Lorem ipsum "</string>
-    <string name="descriptionTask">"Dolor sit amet "</string>
+    <string name="space_value">"\u0020"</string>
+    <string name="title_task">"Lorem ipsum "</string>
+    <string name="description_task">"Dolor sit amet "</string>
     <string name="activity_create_task">Нове завдання</string>
     <string name="activity_edit_task">Редагування завдання</string>
+
 
     <!-- Menu item -->
 
     <string name="settings_sort">Сортування</string>
-    <string name="sort_a_z">A-Z</string>
-    <string name="sort_z_a">Z-A</string>
-    <string name="sort_date_ascending">Date asc</string>
-    <string name="sort_date_descending">Date desc</string>
+    <string name="sort_a_z">А - Я</string>
+    <string name="sort_z_a">Я - А</string>
+    <string name="sort_date_ascending">За датою ↑</string>
+    <string name="sort_date_descending">За датою ↓</string>
     <string name="action_add_item">Додати завдання</string>
     <string name="settings_name">Налаштування</string>
     <string name="action_add_item_x3">Додати х3 завдань</string>
@@ -43,6 +44,7 @@
     <string name="action_exit">Вихід</string>
     <string name="action_save">Зберегти</string>
     <string name="action_cancel">Відмінити</string>
+
 
     <!-- Preference strings -->
 
@@ -58,21 +60,34 @@
     <string name="pref_title_set_default_value">Відновити налаштування</string>
     <string name="pref_summary_set_default_value">Встановлює всі значення за замовчуванням</string>
 
-    <!--Notification -->
+
+    <!-- Notification -->
 
     <string name="content_text">Завдання автоматично завершене</string>
 
-    <!-- Snackbar -->
 
-    <string name="titleStartTaskSnackBar">Початок завдання!</string>
-    <string name="titleResetTaskSnackBar">Завдання скинуто!</string>
-    <string name="titleResetEndTaskSnackBar">Завдання продовжено!</string>
-    <string name="titleExitTwice">Натисніть ще раз для виходу</string>
-    <string name="titleEndTaskSnackBar">Кінець завдання!</string>
+    <!-- Snackbar -->
+    <string name="title_start_task_snackbar">Початок завдання!</string>
+    <string name="title_reset_task_snackbar">Завдання скинуто!</string>
+    <string name="title_reset_end_task_snackbar">Завдання продовжено!</string>
+    <string name="title_exit_twice">Натисніть ще раз для виходу</string>
+    <string name="title_end_task_snackbar">Кінець завдання!</string>
     <string name="title_task_end">Завдання вже завершено</string>
     <string name="title_task_start">Завдання вже розпочато</string>
     <string name="title_task_no_start">Завдання не розпочато</string>
 
 
+    <!-- TextWatcher(EditText) -->
 
+    <string name="error_title">Поле порожнє або немає 5 символів</string>
+    <string name="error_description">Це поле не може бути порожнім</string>
+
+    <!-- ChooserAlertDialog -->
+
+    <string name="title_chooser">Оберіть варіант:</string>
+    <string name="title_chooser_camera">Оберіть варіант:</string>
+    <string-array name="array">
+        <item>Камера</item>
+        <item>Галерея</item>
+    </string-array>
 </resources>

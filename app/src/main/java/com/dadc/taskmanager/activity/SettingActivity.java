@@ -1,16 +1,16 @@
 package com.dadc.taskmanager.activity;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.preference.PreferenceFragment;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 
 import com.dadc.taskmanager.R;
-import com.dadc.taskmanager.preferenceWidgets.TaskPreferenceWidget;
-import com.dadc.taskmanager.preferenceWidgets.TimePreference;
+import com.dadc.taskmanager.widgets.TaskPreference;
+import com.dadc.taskmanager.widgets.TimePreference;
 
 
 /**
@@ -24,23 +24,16 @@ public class SettingActivity extends AppCompatActivity {
     private static final String KEY_COLOR_END = "colorDateEnd";
     private static final String KEY_PREF_DEFAULT = "defaultButton";
     private static final String KEY_PREF_TIME = "timeAlarm";
-    private static final int SETTING_RESULT_CODE = 2;
 
-    Intent mIntent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.setting_activity);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        assert getSupportActionBar() != null;
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        initToolBar();
 
-        mIntent = new Intent();
         getFragmentManager().beginTransaction().replace(R.id.content_frame, new TaskPreferenceFragment()).commit();
-
     }
 
     @Override
@@ -55,13 +48,24 @@ public class SettingActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        setResult(SETTING_RESULT_CODE, mIntent);
+        setResult(RESULT_OK, null);
         super.onBackPressed();
+    }
+
+    private void initToolBar() {
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        ActionBar actionBar = getSupportActionBar();
+
+        if (actionBar != null) {
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        }
     }
 
     public static class TaskPreferenceFragment extends PreferenceFragment {
 
-        TaskPreferenceWidget mColorDefault, mColorStart, mColorEnd;
+        TaskPreference mColorDefault, mColorStart, mColorEnd;
         TimePreference mTimePreference;
 
         @Override
@@ -69,9 +73,9 @@ public class SettingActivity extends AppCompatActivity {
             super.onCreate(savedInstanceState);
             addPreferencesFromResource(R.xml.fragment_preference);
 
-            mColorDefault = (TaskPreferenceWidget) findPreference(KEY_COLOR_DEFAULT);
-            mColorStart = (TaskPreferenceWidget) findPreference(KEY_COLOR_START);
-            mColorEnd = (TaskPreferenceWidget) findPreference(KEY_COLOR_END);
+            mColorDefault = (TaskPreference) findPreference(KEY_COLOR_DEFAULT);
+            mColorStart = (TaskPreference) findPreference(KEY_COLOR_START);
+            mColorEnd = (TaskPreference) findPreference(KEY_COLOR_END);
             mTimePreference = (TimePreference) findPreference(KEY_PREF_TIME);
 
             Preference mPrefButton = findPreference(KEY_PREF_DEFAULT);

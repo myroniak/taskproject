@@ -5,6 +5,7 @@
     xmlns:swipe="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_marginTop="0.5dp"
     swipe:leftEdgeSwipeOffset="0dp"
     swipe:rightEdgeSwipeOffset="0dp">
 
@@ -53,11 +54,18 @@
     </LinearLayout>
 
     <RelativeLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingBottom="1dp"
-        android:paddingTop="1dp">
+        android:layout_height="match_parent"
+        >
+
+        <ImageView
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:id="@+id/imageViewAvatarRec"
+            android:layout_centerVertical="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_marginLeft="2dp"/>
 
         <TextView
             android:id="@+id/textViewTaskTitle"
@@ -65,7 +73,9 @@
             android:layout_height="wrap_content"
             android:padding="5dp"
             android:textColor="@color/colorBlack"
-            android:textSize="@dimen/text_size_title">
+            android:textSize="@dimen/text_size_title"
+            android:layout_toRightOf="@+id/imageViewAvatarRec"
+            android:layout_toEndOf="@+id/imageViewAvatarRec">
         </TextView>
 
         <TextView
@@ -74,7 +84,11 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/textViewTaskTitle"
             android:padding="5dp"
-            android:textColor="@color/colorGrey">
+            android:textColor="@color/colorGrey"
+            android:layout_toRightOf="@+id/imageViewAvatarRec"
+            android:layout_toEndOf="@+id/imageViewAvatarRec"
+            android:text="sdgsthsfht"
+            android:textSize="11dp">
         </TextView>
 
 
@@ -84,9 +98,12 @@
             android:layout_height="wrap_content"
             android:layout_below="@+id/textViewTaskDescription"
             android:padding="5dp"
-            android:textColor="#2300bf">
+            android:textColor="#2300bf"
+            android:layout_alignLeft="@+id/textViewTaskDescription"
+            android:layout_alignStart="@+id/textViewTaskDescription"
+            android:text="xddggj"
+            android:textSize="11dp">
         </TextView>
-
 
         <ImageButton
             android:id="@+id/btnStartTask"
@@ -96,10 +113,11 @@
             android:layout_centerVertical="true"
             android:layout_toLeftOf="@+id/btnStopTask"
             android:layout_toStartOf="@+id/btnStopTask"
-            android:background="@drawable/selector_start"/>
+            android:background="@null"/>
 
         <ImageButton
             android:id="@+id/btnStopTask"
+
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_above="@+id/textViewTaskDate"
@@ -108,5 +126,7 @@
             android:layout_centerVertical="true"
             android:layout_marginRight="5dp"
             android:background="@drawable/selector_stop"/>
+
     </RelativeLayout>
+
 </com.daimajia.swipe.SwipeLayout>

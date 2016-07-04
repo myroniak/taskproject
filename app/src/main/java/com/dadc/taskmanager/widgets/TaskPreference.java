@@ -1,4 +1,4 @@
-package com.dadc.taskmanager.preferenceWidgets;
+package com.dadc.taskmanager.widgets;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -15,10 +15,10 @@ import com.afollestad.materialdialogs.color.ColorChooserDialog;
 import com.dadc.taskmanager.R;
 
 
-public class TaskPreferenceWidget extends Preference {
+public class TaskPreference extends Preference {
     int value;
 
-    public TaskPreferenceWidget(Context context, AttributeSet attrs) {
+    public TaskPreference(Context context, AttributeSet attrs) {
         super(context, attrs);
 
         setWidgetLayoutResource(R.layout.preference_widget);
@@ -83,11 +83,6 @@ public class TaskPreferenceWidget extends Preference {
         }
     }
 
-    /*
-     * Suppose a client uses this preference type without persisting. We
-     * must save the instance state so it is able to, for example, survive
-     * orientation changes.
-     */
     @Override
     protected Parcelable onSaveInstanceState() {
         final Parcelable superState = super.onSaveInstanceState();

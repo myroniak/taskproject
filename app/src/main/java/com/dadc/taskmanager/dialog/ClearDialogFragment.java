@@ -26,19 +26,18 @@ public class ClearDialogFragment extends DialogFragment {
         }
     }
 
-
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder adb = new AlertDialog.Builder(getActivity())
-                .setTitle(R.string.titleAlertDialogClear)
-                .setMessage(R.string.messageAlertDialogClear)
-                .setPositiveButton(R.string.posBtnAlertDialog,
+                .setTitle(R.string.title_alert_clear)
+                .setMessage(R.string.message_alert_clear)
+                .setPositiveButton(R.string.pos_btn_alert,
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int whichButton) {
                                 ((ClearTasks) getActivity()).clearTaskList();
                             }
                         }
                 )
-                .setNegativeButton(R.string.negBtnAlertDialog, null);
+                .setNegativeButton(R.string.neg_btn_alert, null);
         return adb.create();
     }
 }

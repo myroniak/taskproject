@@ -12,12 +12,7 @@ import android.widget.ImageView;
 
 import com.dadc.taskmanager.R;
 
-public class Splash extends AppCompatActivity {
-
-    /**
-     * Duration of wait
-     */
-    private final int SPLASH_DISPLAY_LENGTH = 3000;
+public class SplashActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,32 +20,32 @@ public class Splash extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.splashscreen);
 
-        Animation mAnimation = AnimationUtils.loadAnimation(this, R.anim.anim_alpha);
-        mAnimation.reset();
+        Animation animation = AnimationUtils.loadAnimation(this, R.anim.anim_alpha);
+        animation.reset();
         FrameLayout frameLayout = (FrameLayout) findViewById(R.id.frameSplashScreen);
         assert frameLayout != null;
         frameLayout.clearAnimation();
-        frameLayout.startAnimation(mAnimation);
+        frameLayout.startAnimation(animation);
 
-        mAnimation = AnimationUtils.loadAnimation(this, R.anim.anim_translate);
-        mAnimation.reset();
+        animation = AnimationUtils.loadAnimation(this, R.anim.anim_translate);
+        animation.reset();
         ImageView imageViewLogo = (ImageView) findViewById(R.id.imageViewSplashScreen);
 
         assert imageViewLogo != null;
         imageViewLogo.clearAnimation();
-        imageViewLogo.startAnimation(mAnimation);
+        imageViewLogo.startAnimation(animation);
 
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
 
-                Intent i = new Intent(Splash.this, MainActivity.class);
-                startActivity(i);
+                Intent intent = new Intent(SplashActivity.this, MainActivity.class);
+                startActivity(intent);
                 finish();
                 overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_left);
 
             }
-        }, SPLASH_DISPLAY_LENGTH);
+        }, 3000);
     }
 
 }

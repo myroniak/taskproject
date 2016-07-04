@@ -1,4 +1,4 @@
-package com.dadc.taskmanager.preferenceWidgets;
+package com.dadc.taskmanager.widgets;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -87,6 +87,7 @@ public class TimePreference extends DialogPreference {
                 calendar.setTimeInMillis(Long.parseLong((String) defaultValue));
             }
         }
+        persistLong(calendar.getTimeInMillis());
         setSummary(getSummary());
     }
 

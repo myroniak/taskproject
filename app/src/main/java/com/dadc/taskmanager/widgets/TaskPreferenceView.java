@@ -1,4 +1,4 @@
-package com.dadc.taskmanager.preferenceWidgets;
+package com.dadc.taskmanager.widgets;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -7,12 +7,12 @@ import android.graphics.Paint.Style;
 import android.util.AttributeSet;
 import android.view.View;
 
-public class TaskPrefWidgetView extends View {
+public class TaskPreferenceView extends View {
     Paint paint;
     float rectSize;
     float strokeWidth;
 
-    public TaskPrefWidgetView(Context context, AttributeSet attrs) {
+    public TaskPreferenceView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
         float density = context.getResources().getDisplayMetrics().density;

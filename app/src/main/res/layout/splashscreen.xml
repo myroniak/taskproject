@@ -8,7 +8,7 @@
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:showIn="@layout/splashscreen"
-    tools:context=".activity.Splash">
+    tools:context=".activity.SplashActivity">
     <ImageView
         android:layout_width="256dp"
         android:layout_height="256dp"
