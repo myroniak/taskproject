@@ -18,7 +18,6 @@ import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.format.DateFormat;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -79,7 +78,6 @@ public class TaskActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         ManagerData mManagerData = ManagerData.getInstance(this);
-       // ControlDataTask controlDataTask = new ControlDataTask(this);
         mDefaultTaskColor = mManagerData.getDateDefaultColor();
         mMaxTimeTask = mManagerData.defaultTime();
         mImageHelper = new ImageHelper(this);
@@ -145,16 +143,18 @@ public class TaskActivity extends AppCompatActivity {
                     break;
 
                 case REQUEST_CODE_DESCRIPTION:
-
                     mEditTextDescription.setText(data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS).get(0));
                     break;
+
                 case 7:
                     File file = new File(Environment.getExternalStorageDirectory() + File.separator + "image.jpg");
                     mUri = cropImage(Uri.fromFile(file));
-
                     break;
+
                 case 8:
                     mUri = cropImage(data.getData());
+                    break;
+
                 case Crop.REQUEST_CROP:
                     String fileName = UUID.randomUUID().toString() + ".jpg";
 
@@ -173,8 +173,8 @@ public class TaskActivity extends AppCompatActivity {
 
                     mImageViewAvatar.setImageBitmap(bitmap);
                     pathImage = mImageHelper.getFileDir();
-
                     break;
+
                 default:
                     break;
             }
@@ -194,8 +194,6 @@ public class TaskActivity extends AppCompatActivity {
 
         if (validateTitle() && validateDescription()) {
             Task mTask = new Task(UUID.randomUUID().toString(), mTitle, mDescription, mDefaultTaskColor, 0, 0, mMaxTimeTask, ButtonType.PLAY.name(), pathImage);
-            Log.d("myLog", "mid: " + getUUID());
-
             intent.putExtra(KEY_POSITION_ITEM, mPosition);
             intent.putExtra(KEY_SUBMIT_TASK, mTask);
 

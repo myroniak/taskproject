@@ -3,8 +3,6 @@ package com.dadc.taskmanager.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.util.Comparator;
-
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
 
@@ -12,8 +10,7 @@ import io.realm.annotations.PrimaryKey;
 /**
  * Created by bomko on 27.05.16.
  */
-public class Task extends RealmObject implements Parcelable, Comparable<Task> {
-
+public class Task extends RealmObject implements Parcelable {
 
     @PrimaryKey
     private String mId;
@@ -21,10 +18,10 @@ public class Task extends RealmObject implements Parcelable, Comparable<Task> {
     private String mTitle;
     private String mDescription;
     private String mUrl;
+
     private long mStartDateTask;
     private long mStopDateTask;
     private long maxTime;
-
     private long mPauseStart;
     private long mPauseStop;
     private long mPauseDifferent;
@@ -47,7 +44,7 @@ public class Task extends RealmObject implements Parcelable, Comparable<Task> {
         this.mStopDateTask = mStopDateTask;
         this.maxTime = maxTime;
         this.mButtonType = mButtonType;
-        this.mUrl=mUrl;
+        this.mUrl = mUrl;
     }
 
     public String getId() {
@@ -181,11 +178,6 @@ public class Task extends RealmObject implements Parcelable, Comparable<Task> {
     }
 
     @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeString(mId);
         dest.writeString(mTitle);
@@ -198,41 +190,9 @@ public class Task extends RealmObject implements Parcelable, Comparable<Task> {
         dest.writeString(mUrl);
     }
 
-
-    public static Comparator<Task> TaskTitleComparator = new Comparator<Task>() {
-
-        public int compare(Task task1, Task task2) {
-            return task1.getTitle().compareTo(task2.getTitle());
-        }
-    };
-
-    public static Comparator<Task> TaskReverseTitleComparator = new Comparator<Task>() {
-
-        public int compare(Task task1, Task task2) {
-            return task2.getTitle().compareTo(task1.getTitle());
-        }
-    };
-
-    public static Comparator<Task> TaskDateComparator = new Comparator<Task>() {
-
-        public int compare(Task task1, Task task2) {
-            return Long.compare(task1.getStartDateTask(), task2.getStartDateTask());
-        }
-    };
-
-    public static Comparator<Task> TaskReverseDateComparator = new Comparator<Task>() {
-
-        public int compare(Task task1, Task task2) {
-            return Long.compare(task2.getStartDateTask(), task1.getStartDateTask());
-        }
-    };
-
     @Override
-    public int compareTo(Task compareTask) {
-
+    public int describeContents() {
         return 0;
-
     }
-
 
 }

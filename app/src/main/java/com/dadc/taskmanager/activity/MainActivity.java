@@ -2,7 +2,6 @@ package com.dadc.taskmanager.activity;
 
 import android.content.Context;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -14,7 +13,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -27,13 +25,12 @@ import com.dadc.taskmanager.adapter.TaskAdapter;
 import com.dadc.taskmanager.dialog.ClearDialogFragment;
 import com.dadc.taskmanager.enumstate.ButtonType;
 import com.dadc.taskmanager.migration.Migration;
+import com.dadc.taskmanager.model.LoadSortTask;
 import com.dadc.taskmanager.model.Statistic;
 import com.dadc.taskmanager.model.Task;
 import com.dadc.taskmanager.util.ManagerData;
 
-import java.io.File;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
@@ -51,15 +48,17 @@ public class MainActivity extends AppCompatActivity implements ClearDialogFragme
     private static final int REQUEST_CODE_TASK_EDIT = 2;
     private static final int REQUEST_CODE_SETTING = 3;
     private static Context sContext;
-    ExpandableAdapter adapter;
-    //   private ControlDataTask mControlDataTask;
-
+    private ExpandableAdapter adapter;
     private FloatingActionButton mFloatingActionButton;
-    private ArrayList<Task> mTaskArrayList;
+    private SwipeRefreshLayout swipeRefreshLayout;
+    private ExpandableListView expandableListView;
     private RecyclerView mRecyclerView;
     private ManagerData mManagerData;
-    private ArrayList<Statistic> mStatisticArrayList, arrayList1, arrayList2, arrayList3, arrayList4, arrayList5, arrayList6, arrayList7, arrayList8, arrayList9, arrayList10, arrayList11, arrayList12;
 
+    private HashMap<String, List<Statistic>> сhildDataList;
+    private ArrayList<Statistic> mStatisticArrayList, arrayList1, arrayList2, arrayList3, arrayList4, arrayList5, arrayList6, arrayList7, arrayList8, arrayList9, arrayList10, arrayList11, arrayList12;
+    private ArrayList<Task> mTaskArrayList;
+    private ArrayList<String> mGroupsArray;
     private TaskAdapter mTaskAdapter;
 
     private boolean mDoubleBackToExitPressedOnce = false;
@@ -76,40 +75,29 @@ public class MainActivity extends AppCompatActivity implements ClearDialogFragme
         MainActivity.sContext = this;
 
 
-        TabHost tabHost = (TabHost) findViewById(R.id.tabHost);
-        tabHost.setup();
-
-        TabHost.TabSpec tabSpec = tabHost.newTabSpec("tag1");
-
-        tabSpec.setContent(R.id.relative1);
-        tabSpec.setIndicator("", getResources().getDrawable(R.drawable.ic_assignment_lime_400_48dp));
-        tabHost.addTab(tabSpec);
-
-        tabSpec = tabHost.newTabSpec("tag2");
-        tabSpec.setContent(R.id.relative2);
-        tabSpec.setIndicator("", getResources().getDrawable(R.drawable.ic_assessment_lime_400_48dp));
-        tabHost.addTab(tabSpec);
-
-        tabHost.setCurrentTab(0);
-
-
         if (savedInstanceState != null) {
             mTaskArrayList = savedInstanceState.getParcelableArrayList(KEY_SAVE_INSTANCE);
         } else {
             mTaskArrayList = new ArrayList<>();
         }
-        //mControlDataTask = new ControlDataTask(this);
+
         mManagerData = ManagerData.getInstance(this);
         mDefaultTaskColor = mManagerData.getDateDefaultColor();
 
+        initTabHost();
         initView();
-        initialize();
+        initExpandable();
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
-        mManagerData.loadCheckedItem(menu); //Load checkedItemSort from SharedPreferences
+
+        LoadSortTask loadSortTask = mManagerData.loadSortTask(menu, mTaskArrayList);
+        MenuItem menuItem = loadSortTask.getMenuItem(); //Load checkedItemSort from SharedPreferences
+        if (menuItem != null)
+            mTaskArrayList = loadSortTask.getArrayList();
+
         return true;
     }
 
@@ -117,26 +105,25 @@ public class MainActivity extends AppCompatActivity implements ClearDialogFragme
     public boolean onOptionsItemSelected(MenuItem item) {
 
         int id = item.getItemId();
-
         switch (id) {
 
             case R.id.action_a_z:
-                Collections.sort(mTaskArrayList, Task.TaskTitleComparator);
+                mTaskArrayList = mManagerData.sortAZ(mTaskArrayList);
                 saveSortTask(item);
                 return true;
 
             case R.id.action_z_a:
-                Collections.sort(mTaskArrayList, Task.TaskReverseTitleComparator);
+                mTaskArrayList = mManagerData.sortZA(mTaskArrayList);
                 saveSortTask(item);
                 return true;
 
-            case R.id.action_first_end:
-                Collections.sort(mTaskArrayList, Task.TaskDateComparator);
+            case R.id.action_date_ascending:
+                mTaskArrayList = mManagerData.sortDateAscending(mTaskArrayList);
                 saveSortTask(item);
                 return true;
 
-            case R.id.action_end_first:
-                Collections.sort(mTaskArrayList, Task.TaskReverseDateComparator);
+            case R.id.action_date_descending:
+                mTaskArrayList = mManagerData.sortDateDescending(mTaskArrayList);
                 saveSortTask(item);
                 return true;
 
@@ -186,10 +173,7 @@ public class MainActivity extends AppCompatActivity implements ClearDialogFragme
             switch (requestCode) {
 
                 case REQUEST_CODE_TASK:
-                    //     Task myTask5 = intent.getParcelableExtra(KEY_SUBMIT_TASK);
                     mTaskArrayList.add(0, myTask);
-                    Log.d("myLog", "id:" + myTask.getId());
-
                     break;
 
                 case REQUEST_CODE_TASK_EDIT:
@@ -203,9 +187,6 @@ public class MainActivity extends AppCompatActivity implements ClearDialogFragme
         }
         mManagerData.savePreferenceDataTask(mTaskArrayList); //Save data in SharedPreferences
         mTaskAdapter.notifyDataSetChanged();
-
-        //    mManagerData.toRealm(mTaskArrayList); //Save data in SharedPreferences
-//        mManagerData.addToRealm(mTaskArrayList); //Save data in SharedPreferences
 
     }
 
@@ -249,6 +230,24 @@ public class MainActivity extends AppCompatActivity implements ClearDialogFragme
 
     }
 
+    private void initTabHost() {
+        TabHost tabHost = (TabHost) findViewById(R.id.tabHost);
+        tabHost.setup();
+
+        TabHost.TabSpec tabSpec = tabHost.newTabSpec("tag1");
+
+        tabSpec.setContent(R.id.relative1);
+        tabSpec.setIndicator("", getResources().getDrawable(R.drawable.ic_assignment_lime_400_48dp));
+        tabHost.addTab(tabSpec);
+
+        tabSpec = tabHost.newTabSpec("tag2");
+        tabSpec.setContent(R.id.relative2);
+        tabSpec.setIndicator("", getResources().getDrawable(R.drawable.ic_assessment_lime_400_48dp));
+        tabHost.addTab(tabSpec);
+
+        tabHost.setCurrentTab(0);
+    }
+
     // initialize widget and adapter
     private void initView() {
 
@@ -264,7 +263,7 @@ public class MainActivity extends AppCompatActivity implements ClearDialogFragme
                 mTaskAdapter = new TaskAdapter(MainActivity.this, mTaskArrayList, mStatisticArrayList);
                 mRecyclerView.setAdapter(mTaskAdapter);
             }
-        }, 100);
+        }, 0);
 
         mRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
@@ -286,13 +285,10 @@ public class MainActivity extends AppCompatActivity implements ClearDialogFragme
     //Calculation height item ListView
     private void addManyTasks() {
         if (mTaskArrayList.size() == 0) {
-            Uri uri = Uri.parse("R.drawable.no_avatar");
-            File file = new File(uri.getPath());
-            Log.d("myLog", "filel: " + file.toString());
             mTaskArrayList.add(0, new Task(getUUID(), getResources().getString(R.string.title_task) + 1,
                     getResources().getString(R.string.description_task) + 1,
 
-                    mDefaultTaskColor, 0, 0, mManagerData.defaultTime(), ButtonType.PLAY.name(), file.toString()));
+                    mDefaultTaskColor, 0, 0, mManagerData.defaultTime(), ButtonType.PLAY.name(), ""));
 
             mTaskAdapter.notifyDataSetChanged();
         }
@@ -354,13 +350,10 @@ public class MainActivity extends AppCompatActivity implements ClearDialogFragme
      * Statistic Tab
      */
 
-    HashMap<String, List<Statistic>> сhildDataList;
-    ArrayList<String> mGroupsArray = new ArrayList<>();
-    SwipeRefreshLayout swipeRefreshLayout;
-    ExpandableListView expandableListView;
 
-    public void initialize() {
+    public void initExpandable() {
 
+        mGroupsArray = new ArrayList<>();
         сhildDataList = new HashMap<>();
         mStatisticArrayList = mManagerData.loadStatistic();
 
@@ -390,12 +383,16 @@ public class MainActivity extends AppCompatActivity implements ClearDialogFragme
         arrayList11 = new ArrayList<>();
         arrayList12 = new ArrayList<>();
 
-        refresh();
+        refreshChildExpandable();
 
         adapter = new ExpandableAdapter(this, mGroupsArray, сhildDataList);
 
         expandableListView = (ExpandableListView) findViewById(R.id.expListView);
-        expandableListView.setAdapter(adapter);
+
+        if (expandableListView != null) {
+            expandableListView.setAdapter(adapter);
+        }
+
         swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swiperefresh);
 
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
@@ -403,14 +400,14 @@ public class MainActivity extends AppCompatActivity implements ClearDialogFragme
             public void onRefresh() {
                 if (arrayList7.size() != 0)
                     сhildDataList.get("Липень").removeAll(arrayList7);
-                refresh();
+                refreshChildExpandable();
                 adapter.notifyDataSetChanged();
                 swipeRefreshLayout.setRefreshing(false);
             }
         });
     }
 
-    public void refresh() {
+    public void refreshChildExpandable() {
         for (int i = 0; i < mStatisticArrayList.size(); i++) {
 
             switch (mStatisticArrayList.get(i).getMonth()) {
@@ -453,7 +450,6 @@ public class MainActivity extends AppCompatActivity implements ClearDialogFragme
                 default:
                     break;
             }
-
         }
 
         сhildDataList.put(mGroupsArray.get(0), arrayList1);
@@ -468,8 +464,6 @@ public class MainActivity extends AppCompatActivity implements ClearDialogFragme
         сhildDataList.put(mGroupsArray.get(9), arrayList10);
         сhildDataList.put(mGroupsArray.get(10), arrayList11);
         сhildDataList.put(mGroupsArray.get(11), arrayList12);
-
-
     }
 
 }

@@ -8,6 +8,7 @@ import android.view.MenuItem;
 
 import com.dadc.taskmanager.R;
 import com.dadc.taskmanager.adapter.TaskAdapter;
+import com.dadc.taskmanager.model.LoadSortTask;
 import com.dadc.taskmanager.model.Statistic;
 import com.dadc.taskmanager.model.Task;
 
@@ -15,6 +16,7 @@ import java.util.ArrayList;
 
 import io.realm.Realm;
 import io.realm.RealmResults;
+import io.realm.Sort;
 
 /**
  * Created by bomko on 02.07.16.
@@ -251,26 +253,84 @@ public class ManagerData {
         mEditor.commit();
     }
 
-    public MenuItem loadCheckedItem(Menu menu) {
+    public LoadSortTask loadSortTask(Menu menu, ArrayList<Task> mTaskArrayList) {
 
+        ArrayList<Task> taskArrayList = new ArrayList<>();
         MenuItem menuItem = null;
 
         String isCk = mSettings.getString(CHECKED_ITEM, "");
 
         if (isCk.contains(mContext.getResources().getString(R.string.sort_a_z))) {
             menuItem = menu.findItem(R.id.action_a_z).setChecked(true);
+            taskArrayList = sortAZ(mTaskArrayList);
 
         } else if (isCk.contains(mContext.getResources().getString(R.string.sort_z_a))) {
             menuItem = menu.findItem(R.id.action_z_a).setChecked(true);
+            taskArrayList = sortZA(mTaskArrayList);
 
         } else if (isCk.contains(mContext.getResources().getString(R.string.sort_date_ascending))) {
-            menuItem = menu.findItem(R.id.action_first_end).setChecked(true);
+            menuItem = menu.findItem(R.id.action_date_ascending).setChecked(true);
+            taskArrayList = sortDateAscending(mTaskArrayList);
 
         } else if (isCk.contains(mContext.getResources().getString(R.string.sort_date_descending))) {
-            menuItem = menu.findItem(R.id.action_end_first).setChecked(true);
-
+            menuItem = menu.findItem(R.id.action_date_descending).setChecked(true);
+            taskArrayList = sortDateDescending(mTaskArrayList);
         }
-        return menuItem;
+
+        return new LoadSortTask(menuItem, taskArrayList);
     }
 
+    /**
+     * Sort mArrayList
+     */
+
+    public ArrayList<Task> sortAZ(ArrayList<Task> arrayList) {
+        mRealm.beginTransaction();
+        RealmResults<Task> realmResults = mRealm.where(Task.class).findAll();
+        realmResults = realmResults.sort("mTitle", Sort.ASCENDING);
+        for (int i = 0; i < realmResults.size(); i++) {
+            Task task = realmResults.get(i);
+            arrayList.set(i, task);
+        }
+        mRealm.commitTransaction();
+        return arrayList;
+    }
+
+    public ArrayList<Task> sortZA(ArrayList<Task> arrayList) {
+        mRealm.beginTransaction();
+
+        RealmResults<Task> realmResults = mRealm.where(Task.class).findAll();
+        realmResults = realmResults.sort("mTitle", Sort.DESCENDING);
+        for (int i = 0; i < realmResults.size(); i++) {
+            Task task = realmResults.get(i);
+            arrayList.set(i, task);
+        }
+        mRealm.commitTransaction();
+        return arrayList;
+    }
+
+    public ArrayList<Task> sortDateAscending(ArrayList<Task> arrayList) {
+        mRealm.beginTransaction();
+
+        RealmResults<Task> realmResults = mRealm.where(Task.class).findAll();
+        realmResults = realmResults.sort("mStartDateTask", Sort.ASCENDING);
+        for (int i = 0; i < realmResults.size(); i++) {
+            Task task = realmResults.get(i);
+            arrayList.set(i, task);
+        }
+        mRealm.commitTransaction();
+        return arrayList;
+    }
+
+    public ArrayList<Task> sortDateDescending(ArrayList<Task> arrayList) {
+        mRealm.beginTransaction();
+        RealmResults<Task> realmResults = mRealm.where(Task.class).findAll();
+        realmResults = realmResults.sort("mStartDateTask", Sort.DESCENDING);
+        for (int i = 0; i < realmResults.size(); i++) {
+            Task task = realmResults.get(i);
+            arrayList.set(i, task);
+        }
+        mRealm.commitTransaction();
+        return arrayList;
+    }
 }

@@ -21,11 +21,11 @@
 
                     app:showAsAction="never"/>
                 <item
-                    android:id="@+id/action_first_end"
+                    android:id="@+id/action_date_ascending"
                     android:title="@string/sort_date_ascending"
                     app:showAsAction="never"/>
                 <item
-                    android:id="@+id/action_end_first"
+                    android:id="@+id/action_date_descending"
                     android:title="@string/sort_date_descending"
                     app:showAsAction="never"/>
             </group>
