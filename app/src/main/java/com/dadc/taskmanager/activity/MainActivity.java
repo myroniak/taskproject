@@ -28,7 +28,7 @@ import com.dadc.taskmanager.migration.Migration;
 import com.dadc.taskmanager.model.LoadSortTask;
 import com.dadc.taskmanager.model.Statistic;
 import com.dadc.taskmanager.model.Task;
-import com.dadc.taskmanager.util.ManagerData;
+import com.dadc.taskmanager.util.ManagerDataRealm;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -48,14 +48,15 @@ public class MainActivity extends AppCompatActivity implements ClearDialogFragme
     private static final int REQUEST_CODE_TASK_EDIT = 2;
     private static final int REQUEST_CODE_SETTING = 3;
     private static Context sContext;
-    private ExpandableAdapter adapter;
-    private FloatingActionButton mFloatingActionButton;
-    private SwipeRefreshLayout swipeRefreshLayout;
-    private ExpandableListView expandableListView;
-    private RecyclerView mRecyclerView;
-    private ManagerData mManagerData;
 
-    private HashMap<String, List<Statistic>> сhildDataList;
+    private ExpandableAdapter mExpandableAdapter;
+    private FloatingActionButton mFloatingActionButton;
+    private SwipeRefreshLayout mSwipeRefreshLayout;
+    private ExpandableListView mExpandableListView;
+    private RecyclerView mRecyclerView;
+    private ManagerDataRealm mManagerDataRealm;
+
+    private HashMap<String, List<Statistic>> mChildDataList;
     private ArrayList<Statistic> mStatisticArrayList, arrayList1, arrayList2, arrayList3, arrayList4, arrayList5, arrayList6, arrayList7, arrayList8, arrayList9, arrayList10, arrayList11, arrayList12;
     private ArrayList<Task> mTaskArrayList;
     private ArrayList<String> mGroupsArray;
@@ -74,15 +75,14 @@ public class MainActivity extends AppCompatActivity implements ClearDialogFragme
         PreferenceManager.setDefaultValues(this, R.xml.fragment_preference, false);
         MainActivity.sContext = this;
 
-
         if (savedInstanceState != null) {
             mTaskArrayList = savedInstanceState.getParcelableArrayList(KEY_SAVE_INSTANCE);
         } else {
             mTaskArrayList = new ArrayList<>();
         }
 
-        mManagerData = ManagerData.getInstance(this);
-        mDefaultTaskColor = mManagerData.getDateDefaultColor();
+        mManagerDataRealm = ManagerDataRealm.getInstance(this);
+        mDefaultTaskColor = mManagerDataRealm.getDateDefaultColor();
 
         initTabHost();
         initView();
@@ -93,7 +93,7 @@ public class MainActivity extends AppCompatActivity implements ClearDialogFragme
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
 
-        LoadSortTask loadSortTask = mManagerData.loadSortTask(menu, mTaskArrayList);
+        LoadSortTask loadSortTask = mManagerDataRealm.loadSortTask(menu, mTaskArrayList);
         MenuItem menuItem = loadSortTask.getMenuItem(); //Load checkedItemSort from SharedPreferences
         if (menuItem != null)
             mTaskArrayList = loadSortTask.getArrayList();
@@ -108,22 +108,22 @@ public class MainActivity extends AppCompatActivity implements ClearDialogFragme
         switch (id) {
 
             case R.id.action_a_z:
-                mTaskArrayList = mManagerData.sortAZ(mTaskArrayList);
+                mTaskArrayList = mManagerDataRealm.sortAZ(mTaskArrayList);
                 saveSortTask(item);
                 return true;
 
             case R.id.action_z_a:
-                mTaskArrayList = mManagerData.sortZA(mTaskArrayList);
+                mTaskArrayList = mManagerDataRealm.sortZA(mTaskArrayList);
                 saveSortTask(item);
                 return true;
 
             case R.id.action_date_ascending:
-                mTaskArrayList = mManagerData.sortDateAscending(mTaskArrayList);
+                mTaskArrayList = mManagerDataRealm.sortDateAscending(mTaskArrayList);
                 saveSortTask(item);
                 return true;
 
             case R.id.action_date_descending:
-                mTaskArrayList = mManagerData.sortDateDescending(mTaskArrayList);
+                mTaskArrayList = mManagerDataRealm.sortDateDescending(mTaskArrayList);
                 saveSortTask(item);
                 return true;
 
@@ -162,8 +162,8 @@ public class MainActivity extends AppCompatActivity implements ClearDialogFragme
         if (resultCode == RESULT_OK && requestCode == REQUEST_CODE_SETTING) {
 
             //Update color
-            mDefaultTaskColor = mManagerData.getDateDefaultColor();
-            mManagerData.updateColorDateTask();
+            mDefaultTaskColor = mManagerDataRealm.getDateDefaultColor();
+            mManagerDataRealm.updateColorDateTask();
 
         } else if (resultCode == RESULT_OK && intent != null) {
 
@@ -185,7 +185,7 @@ public class MainActivity extends AppCompatActivity implements ClearDialogFragme
             }
 
         }
-        mManagerData.savePreferenceDataTask(mTaskArrayList); //Save data in SharedPreferences
+        mManagerDataRealm.savePreferenceDataTask(mTaskArrayList); //Save data in SharedPreferences
         mTaskAdapter.notifyDataSetChanged();
 
     }
@@ -214,7 +214,7 @@ public class MainActivity extends AppCompatActivity implements ClearDialogFragme
 
     @Override
     public void clearTaskList() {
-        mManagerData.deleteAllRealm(mTaskArrayList, mTaskAdapter);
+        mManagerDataRealm.deleteAllRealm(mTaskArrayList, mTaskAdapter);
     }
 
 
@@ -259,7 +259,7 @@ public class MainActivity extends AppCompatActivity implements ClearDialogFragme
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                mTaskArrayList = mManagerData.loadPreferenceDataTask();
+                mTaskArrayList = mManagerDataRealm.loadPreferenceDataTask();
                 mTaskAdapter = new TaskAdapter(MainActivity.this, mTaskArrayList, mStatisticArrayList);
                 mRecyclerView.setAdapter(mTaskAdapter);
             }
@@ -288,7 +288,7 @@ public class MainActivity extends AppCompatActivity implements ClearDialogFragme
             mTaskArrayList.add(0, new Task(getUUID(), getResources().getString(R.string.title_task) + 1,
                     getResources().getString(R.string.description_task) + 1,
 
-                    mDefaultTaskColor, 0, 0, mManagerData.defaultTime(), ButtonType.PLAY.name(), ""));
+                    mDefaultTaskColor, 0, 0, mManagerDataRealm.defaultTime(), ButtonType.PLAY.name(), ""));
 
             mTaskAdapter.notifyDataSetChanged();
         }
@@ -306,19 +306,19 @@ public class MainActivity extends AppCompatActivity implements ClearDialogFragme
                     int randomNumber = random.nextInt((100 - 2) + 2) + 2;
                     mTaskArrayList.add(0, new Task(getUUID(), getResources().getString(R.string.title_task) +
                             randomNumber, getResources().getString(R.string.description_task) + randomNumber,
-                            mDefaultTaskColor, 0, 0, mManagerData.defaultTime(), ButtonType.PLAY.name(), ""));
+                            mDefaultTaskColor, 0, 0, mManagerDataRealm.defaultTime(), ButtonType.PLAY.name(), ""));
                 }
                 mTaskAdapter.notifyDataSetChanged();
-                mManagerData.savePreferenceDataTask(mTaskArrayList); //Save data in SharedPreferences
+                mManagerDataRealm.savePreferenceDataTask(mTaskArrayList); //Save data in SharedPreferences
             }
         }, 10);
     }
 
     private void saveSortTask(MenuItem item) {
         item.setChecked(true);
-        mManagerData.saveCheckedItem(item); //Save checkedItem in SharedPreferences
+        mManagerDataRealm.saveCheckedItem(item); //Save checkedItem in SharedPreferences
         mTaskAdapter.notifyDataSetChanged();
-        mManagerData.savePreferenceDataTask(mTaskArrayList);  //Save data in SharedPreferences
+        mManagerDataRealm.savePreferenceDataTask(mTaskArrayList);  //Save data in SharedPreferences
     }
 
     private String getUUID() {
@@ -350,12 +350,11 @@ public class MainActivity extends AppCompatActivity implements ClearDialogFragme
      * Statistic Tab
      */
 
-
     public void initExpandable() {
 
         mGroupsArray = new ArrayList<>();
-        сhildDataList = new HashMap<>();
-        mStatisticArrayList = mManagerData.loadStatistic();
+        mChildDataList = new HashMap<>();
+        mStatisticArrayList = mManagerDataRealm.loadStatistic();
 
         mGroupsArray.add("Січень");
         mGroupsArray.add("Лютий");
@@ -385,24 +384,24 @@ public class MainActivity extends AppCompatActivity implements ClearDialogFragme
 
         refreshChildExpandable();
 
-        adapter = new ExpandableAdapter(this, mGroupsArray, сhildDataList);
+        mExpandableAdapter = new ExpandableAdapter(this, mGroupsArray, mChildDataList);
 
-        expandableListView = (ExpandableListView) findViewById(R.id.expListView);
+        mExpandableListView = (ExpandableListView) findViewById(R.id.expListView);
 
-        if (expandableListView != null) {
-            expandableListView.setAdapter(adapter);
+        if (mExpandableListView != null) {
+            mExpandableListView.setAdapter(mExpandableAdapter);
         }
 
-        swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swiperefresh);
+        mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.swiperefresh);
 
-        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+        mSwipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
                 if (arrayList7.size() != 0)
-                    сhildDataList.get("Липень").removeAll(arrayList7);
+                    mChildDataList.get("Липень").removeAll(arrayList7);
                 refreshChildExpandable();
-                adapter.notifyDataSetChanged();
-                swipeRefreshLayout.setRefreshing(false);
+                mExpandableAdapter.notifyDataSetChanged();
+                mSwipeRefreshLayout.setRefreshing(false);
             }
         });
     }
@@ -452,18 +451,18 @@ public class MainActivity extends AppCompatActivity implements ClearDialogFragme
             }
         }
 
-        сhildDataList.put(mGroupsArray.get(0), arrayList1);
-        сhildDataList.put(mGroupsArray.get(1), arrayList2);
-        сhildDataList.put(mGroupsArray.get(2), arrayList3);
-        сhildDataList.put(mGroupsArray.get(3), arrayList4);
-        сhildDataList.put(mGroupsArray.get(4), arrayList5);
-        сhildDataList.put(mGroupsArray.get(5), arrayList6);
-        сhildDataList.put(mGroupsArray.get(6), arrayList7);
-        сhildDataList.put(mGroupsArray.get(7), arrayList8);
-        сhildDataList.put(mGroupsArray.get(8), arrayList9);
-        сhildDataList.put(mGroupsArray.get(9), arrayList10);
-        сhildDataList.put(mGroupsArray.get(10), arrayList11);
-        сhildDataList.put(mGroupsArray.get(11), arrayList12);
+        mChildDataList.put(mGroupsArray.get(0), arrayList1);
+        mChildDataList.put(mGroupsArray.get(1), arrayList2);
+        mChildDataList.put(mGroupsArray.get(2), arrayList3);
+        mChildDataList.put(mGroupsArray.get(3), arrayList4);
+        mChildDataList.put(mGroupsArray.get(4), arrayList5);
+        mChildDataList.put(mGroupsArray.get(5), arrayList6);
+        mChildDataList.put(mGroupsArray.get(6), arrayList7);
+        mChildDataList.put(mGroupsArray.get(7), arrayList8);
+        mChildDataList.put(mGroupsArray.get(8), arrayList9);
+        mChildDataList.put(mGroupsArray.get(9), arrayList10);
+        mChildDataList.put(mGroupsArray.get(10), arrayList11);
+        mChildDataList.put(mGroupsArray.get(11), arrayList12);
     }
 
 }

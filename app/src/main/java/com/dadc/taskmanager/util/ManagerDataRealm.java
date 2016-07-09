@@ -21,16 +21,22 @@ import io.realm.Sort;
 /**
  * Created by bomko on 02.07.16.
  */
-public class ManagerData {
+public class ManagerDataRealm {
 
-    private static ManagerData sInstance;
+    private static ManagerDataRealm sInstance;
 
+    private static final String KEY_EMPTY = "";
+    private static final String KEY_DEFAULT_TIME = "timeAlarm";
     private static final String DEFAULT_COLOR_DATE = "colorDateDefault";
     private static final String START_COLOR_DATE = "colorDateStart";
     private static final String END_COLOR_DATE = "colorDateEnd";
     private static final String APP_PREFERENCES = "setting";
     private static final String CHECKED_ITEM = "checked";
     private static final String KEY_VALUE = "key";
+    private static final String KEY_REALM_ID = "mId";
+    private static final String KEY_REALM_SORT_TITLE = "mTitle";
+    private static final String KEY_REALM_SORT_DATE = "mStartDateTask";
+
 
     private SharedPreferences mSettings, mDefaultSetting;
     private SharedPreferences.Editor mEditor;
@@ -38,14 +44,14 @@ public class ManagerData {
     private Realm mRealm;
     private Context mContext;
 
-    public static ManagerData getInstance(Context context) {
+    public static ManagerDataRealm getInstance(Context context) {
         if (sInstance == null) {
-            sInstance = new ManagerData(context);
+            sInstance = new ManagerDataRealm(context);
         }
         return sInstance;
     }
 
-    private ManagerData(Context context) {
+    private ManagerDataRealm(Context context) {
         mContext = context;
         mRealm = Realm.getDefaultInstance();
         mSettings = mContext.getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE);
@@ -74,10 +80,10 @@ public class ManagerData {
 
     public Statistic diffStatistic(Statistic statistic, long diffTime) {
         mRealm.beginTransaction();
-        Statistic taskUpdate = mRealm.where(Statistic.class).equalTo("mId", statistic.getId()).findFirst();
-        taskUpdate.setDifferentTime(diffTime);
+        Statistic statisticUpdate = mRealm.where(Statistic.class).equalTo(KEY_REALM_ID, statistic.getId()).findFirst();
+        statisticUpdate.setDifferentTime(diffTime);
         mRealm.commitTransaction();
-        return taskUpdate;
+        return statisticUpdate;
     }
 
     public void savePreferenceDataTask(ArrayList<Task> arrayList) {
@@ -102,7 +108,7 @@ public class ManagerData {
 
     public Task startTask(Task task, int color) {
         mRealm.beginTransaction();
-        Task taskUpdate = mRealm.where(Task.class).equalTo("mId", task.getId()).findFirst();
+        Task taskUpdate = mRealm.where(Task.class).equalTo(KEY_REALM_ID, task.getId()).findFirst();
         taskUpdate.setSelected(true);
         taskUpdate.setTaskColor(color);
         taskUpdate.setStartDateTask(System.currentTimeMillis());
@@ -113,7 +119,7 @@ public class ManagerData {
 
     public Task stopTask(String buttonType, Task task, int color) {
         mRealm.beginTransaction();
-        Task taskUpdate = mRealm.where(Task.class).equalTo("mId", task.getId()).findFirst();
+        Task taskUpdate = mRealm.where(Task.class).equalTo(KEY_REALM_ID, task.getId()).findFirst();
         taskUpdate.setSelected(true);
         taskUpdate.setTaskColor(color);
         taskUpdate.setStopDateTask(System.currentTimeMillis());
@@ -133,7 +139,7 @@ public class ManagerData {
 
     public Task pauseTask(Task task) {
         mRealm.beginTransaction();
-        Task taskUpdate = mRealm.where(Task.class).equalTo("mId", task.getId()).findFirst();
+        Task taskUpdate = mRealm.where(Task.class).equalTo(KEY_REALM_ID, task.getId()).findFirst();
         taskUpdate.setPauseStart(0);
         taskUpdate.setPauseStop(0);
         taskUpdate.setPauseStart(System.currentTimeMillis());
@@ -143,7 +149,7 @@ public class ManagerData {
 
     public Task resumeTask(Task task, long differentTime, long pauseStop) {
         mRealm.beginTransaction();
-        Task taskUpdate = mRealm.where(Task.class).equalTo("mId", task.getId()).findFirst();
+        Task taskUpdate = mRealm.where(Task.class).equalTo(KEY_REALM_ID, task.getId()).findFirst();
         taskUpdate.setPauseDifferent(differentTime);
         taskUpdate.setPauseStop(pauseStop);
         mRealm.commitTransaction();
@@ -153,7 +159,7 @@ public class ManagerData {
 
     public Task swipeResetTask(Task task, int mDefaultTaskColor) {
         mRealm.beginTransaction();
-        Task taskUpdate = mRealm.where(Task.class).equalTo("mId", task.getId()).findFirst();
+        Task taskUpdate = mRealm.where(Task.class).equalTo(KEY_REALM_ID, task.getId()).findFirst();
         taskUpdate.setTaskColor(mDefaultTaskColor);
         taskUpdate.setSelected(false);
         taskUpdate.setStopDateTask(0);
@@ -165,7 +171,7 @@ public class ManagerData {
     public Task swipeResetTaskEnd(Task task, int mStartTaskColor) {
 
         mRealm.beginTransaction();
-        Task taskUpdate = mRealm.where(Task.class).equalTo("mId", task.getId()).findFirst();
+        Task taskUpdate = mRealm.where(Task.class).equalTo(KEY_REALM_ID, task.getId()).findFirst();
         taskUpdate.setTaskColor(mStartTaskColor);
         taskUpdate.setSelected(true);
         taskUpdate.setStopDateTask(0);
@@ -176,9 +182,9 @@ public class ManagerData {
 
     public void deleteTaskFromRealm(String id) {
         mRealm.beginTransaction();
-        Task task = mRealm.where(Task.class).equalTo("mId", id).findFirst();
+        Task task = mRealm.where(Task.class).equalTo(KEY_REALM_ID, id).findFirst();
         task.deleteFromRealm();
-        Statistic statistic = mRealm.where(Statistic.class).equalTo("mId", id).findFirst();
+        Statistic statistic = mRealm.where(Statistic.class).equalTo(KEY_REALM_ID, id).findFirst();
         statistic.deleteFromRealm();
         mRealm.commitTransaction();
     }
@@ -209,7 +215,7 @@ public class ManagerData {
 
     public Task updateEnum(String str, Task task) {
         mRealm.beginTransaction();
-        Task taskUpdate = mRealm.where(Task.class).equalTo("mId", task.getId()).findFirst();
+        Task taskUpdate = mRealm.where(Task.class).equalTo(KEY_REALM_ID, task.getId()).findFirst();
         taskUpdate.setButtonType(str);
         mRealm.commitTransaction();
         return taskUpdate;
@@ -233,7 +239,7 @@ public class ManagerData {
 
 
     public long defaultTime() {
-        return mDefaultSetting.getLong("timeAlarm", 0);
+        return mDefaultSetting.getLong(KEY_DEFAULT_TIME, 0);
     }
 
     public int getDateDefaultColor() {
@@ -253,12 +259,66 @@ public class ManagerData {
         mEditor.commit();
     }
 
+
+    /**
+     * Sort mTaskArrayList
+     */
+    public ArrayList<Task> sortAZ(ArrayList<Task> arrayList) {
+        mRealm.beginTransaction();
+        RealmResults<Task> realmResults = mRealm.where(Task.class).findAll();
+        realmResults = realmResults.sort(KEY_REALM_SORT_TITLE, Sort.ASCENDING);
+        for (int i = 0; i < realmResults.size(); i++) {
+            Task task = realmResults.get(i);
+            arrayList.set(i, task);
+        }
+        mRealm.commitTransaction();
+        return arrayList;
+    }
+
+    public ArrayList<Task> sortZA(ArrayList<Task> arrayList) {
+        mRealm.beginTransaction();
+
+        RealmResults<Task> realmResults = mRealm.where(Task.class).findAll();
+        realmResults = realmResults.sort(KEY_REALM_SORT_TITLE, Sort.DESCENDING);
+        for (int i = 0; i < realmResults.size(); i++) {
+            Task task = realmResults.get(i);
+            arrayList.set(i, task);
+        }
+        mRealm.commitTransaction();
+        return arrayList;
+    }
+
+    public ArrayList<Task> sortDateAscending(ArrayList<Task> arrayList) {
+        mRealm.beginTransaction();
+
+        RealmResults<Task> realmResults = mRealm.where(Task.class).findAll();
+        realmResults = realmResults.sort(KEY_REALM_SORT_DATE, Sort.ASCENDING);
+        for (int i = 0; i < realmResults.size(); i++) {
+            Task task = realmResults.get(i);
+            arrayList.set(i, task);
+        }
+        mRealm.commitTransaction();
+        return arrayList;
+    }
+
+    public ArrayList<Task> sortDateDescending(ArrayList<Task> arrayList) {
+        mRealm.beginTransaction();
+        RealmResults<Task> realmResults = mRealm.where(Task.class).findAll();
+        realmResults = realmResults.sort(KEY_REALM_SORT_DATE, Sort.DESCENDING);
+        for (int i = 0; i < realmResults.size(); i++) {
+            Task task = realmResults.get(i);
+            arrayList.set(i, task);
+        }
+        mRealm.commitTransaction();
+        return arrayList;
+    }
+
     public LoadSortTask loadSortTask(Menu menu, ArrayList<Task> mTaskArrayList) {
 
         ArrayList<Task> taskArrayList = new ArrayList<>();
         MenuItem menuItem = null;
 
-        String isCk = mSettings.getString(CHECKED_ITEM, "");
+        String isCk = mSettings.getString(CHECKED_ITEM, KEY_EMPTY);
 
         if (isCk.contains(mContext.getResources().getString(R.string.sort_a_z))) {
             menuItem = menu.findItem(R.id.action_a_z).setChecked(true);
@@ -278,59 +338,5 @@ public class ManagerData {
         }
 
         return new LoadSortTask(menuItem, taskArrayList);
-    }
-
-    /**
-     * Sort mArrayList
-     */
-
-    public ArrayList<Task> sortAZ(ArrayList<Task> arrayList) {
-        mRealm.beginTransaction();
-        RealmResults<Task> realmResults = mRealm.where(Task.class).findAll();
-        realmResults = realmResults.sort("mTitle", Sort.ASCENDING);
-        for (int i = 0; i < realmResults.size(); i++) {
-            Task task = realmResults.get(i);
-            arrayList.set(i, task);
-        }
-        mRealm.commitTransaction();
-        return arrayList;
-    }
-
-    public ArrayList<Task> sortZA(ArrayList<Task> arrayList) {
-        mRealm.beginTransaction();
-
-        RealmResults<Task> realmResults = mRealm.where(Task.class).findAll();
-        realmResults = realmResults.sort("mTitle", Sort.DESCENDING);
-        for (int i = 0; i < realmResults.size(); i++) {
-            Task task = realmResults.get(i);
-            arrayList.set(i, task);
-        }
-        mRealm.commitTransaction();
-        return arrayList;
-    }
-
-    public ArrayList<Task> sortDateAscending(ArrayList<Task> arrayList) {
-        mRealm.beginTransaction();
-
-        RealmResults<Task> realmResults = mRealm.where(Task.class).findAll();
-        realmResults = realmResults.sort("mStartDateTask", Sort.ASCENDING);
-        for (int i = 0; i < realmResults.size(); i++) {
-            Task task = realmResults.get(i);
-            arrayList.set(i, task);
-        }
-        mRealm.commitTransaction();
-        return arrayList;
-    }
-
-    public ArrayList<Task> sortDateDescending(ArrayList<Task> arrayList) {
-        mRealm.beginTransaction();
-        RealmResults<Task> realmResults = mRealm.where(Task.class).findAll();
-        realmResults = realmResults.sort("mStartDateTask", Sort.DESCENDING);
-        for (int i = 0; i < realmResults.size(); i++) {
-            Task task = realmResults.get(i);
-            arrayList.set(i, task);
-        }
-        mRealm.commitTransaction();
-        return arrayList;
     }
 }

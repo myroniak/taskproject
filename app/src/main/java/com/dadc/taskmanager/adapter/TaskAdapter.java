@@ -17,7 +17,7 @@ import com.dadc.taskmanager.enumstate.ButtonType;
 import com.dadc.taskmanager.helper.AdapterHelper;
 import com.dadc.taskmanager.model.Statistic;
 import com.dadc.taskmanager.model.Task;
-import com.dadc.taskmanager.util.ManagerData;
+import com.dadc.taskmanager.util.ManagerDataRealm;
 import com.daimajia.swipe.SwipeLayout;
 import com.daimajia.swipe.adapters.RecyclerSwipeAdapter;
 
@@ -28,7 +28,7 @@ import java.util.TimeZone;
 
 public class TaskAdapter extends RecyclerSwipeAdapter<TaskAdapter.MyViewHolder> {
 
-    private ManagerData mManagerData;
+    private ManagerDataRealm mManagerDataRealm;
     private ArrayList<Task> mTaskArrayList;
     private Context mContext;
     private String mStartDate, mStopDate, mElapsedDate;
@@ -43,7 +43,7 @@ public class TaskAdapter extends RecyclerSwipeAdapter<TaskAdapter.MyViewHolder> 
         this.mTaskArrayList = mTaskArrayList;
         this.mStatisticArrayList = mStatisticArrayList;
 
-        mManagerData = ManagerData.getInstance(mContext);
+        mManagerDataRealm = ManagerDataRealm.getInstance(mContext);
         mAlarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
     }
 
@@ -198,7 +198,7 @@ public class TaskAdapter extends RecyclerSwipeAdapter<TaskAdapter.MyViewHolder> 
         mAdapterHelper.stopAlarmManager();
         mItemManger.closeAllItems();
 
-        mManagerData.deleteTaskFromRealm(task.getId());
+        mManagerDataRealm.deleteTaskFromRealm(task.getId());
         notifyDataSetChanged();
     }
 
@@ -209,7 +209,7 @@ public class TaskAdapter extends RecyclerSwipeAdapter<TaskAdapter.MyViewHolder> 
 
     public void initialData(int position) {
         mAdapterHelper = new AdapterHelper(mStatisticArrayList, mTaskArrayList, mContext, mStartTaskColor,
-                mEndTaskColor, mDefaultTaskColor, mAlarmManager, mItemManger, mManagerData, this);
+                mEndTaskColor, mDefaultTaskColor, mAlarmManager, mItemManger, mManagerDataRealm, this);
         mResources = mContext.getResources();
 
         DateFormat mDateFormatFull = new SimpleDateFormat(mResources.getString(R.string.full_format));
@@ -221,9 +221,9 @@ public class TaskAdapter extends RecyclerSwipeAdapter<TaskAdapter.MyViewHolder> 
         mStopDate = mDateFormatFull.format(getItem(position).getStopDateTask());
         mElapsedDate = mDateFormatShort.format(getItem(position).getPauseDifferent());
 
-        mDefaultTaskColor = mManagerData.getDateDefaultColor();
-        mStartTaskColor = mManagerData.getDateStartColor();
-        mEndTaskColor = mManagerData.getDateEndColor();
+        mDefaultTaskColor = mManagerDataRealm.getDateDefaultColor();
+        mStartTaskColor = mManagerDataRealm.getDateStartColor();
+        mEndTaskColor = mManagerDataRealm.getDateEndColor();
     }
 
 

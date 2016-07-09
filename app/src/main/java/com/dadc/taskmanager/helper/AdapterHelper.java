@@ -15,7 +15,7 @@ import com.dadc.taskmanager.enumstate.ButtonType;
 import com.dadc.taskmanager.model.Statistic;
 import com.dadc.taskmanager.model.Task;
 import com.dadc.taskmanager.receiver.Receiver;
-import com.dadc.taskmanager.util.ManagerData;
+import com.dadc.taskmanager.util.ManagerDataRealm;
 import com.daimajia.swipe.SwipeLayout;
 import com.daimajia.swipe.implments.SwipeItemRecyclerMangerImpl;
 
@@ -41,7 +41,7 @@ public class AdapterHelper {
     private ArrayList<Task> mTaskArrayList;
 
     private SwipeItemRecyclerMangerImpl mItemManger;
-    private ManagerData mControlDataTask;
+    private ManagerDataRealm mControlDataTask;
     private PendingIntent mAlarmSender;
     private AlarmManager mAlarmManager;
     private TaskAdapter adapter;
@@ -51,7 +51,7 @@ public class AdapterHelper {
 
     public AdapterHelper(ArrayList<Statistic> mStatisticArrayList, ArrayList<Task> mTaskArrayList, Context mContext,
                          int mStartTaskColor, int mEndTaskColor, int mDefaultTaskColor, AlarmManager mAlarmManager,
-                         SwipeItemRecyclerMangerImpl mItemManger, ManagerData mControlDataTask, TaskAdapter adapter) {
+                         SwipeItemRecyclerMangerImpl mItemManger, ManagerDataRealm mControlDataTask, TaskAdapter adapter) {
 
         this.mStatisticArrayList = mStatisticArrayList;
         this.mTaskArrayList = mTaskArrayList;

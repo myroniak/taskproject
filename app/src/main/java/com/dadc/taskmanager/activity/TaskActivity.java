@@ -32,7 +32,7 @@ import com.dadc.taskmanager.R;
 import com.dadc.taskmanager.enumstate.ButtonType;
 import com.dadc.taskmanager.helper.ImageHelper;
 import com.dadc.taskmanager.model.Task;
-import com.dadc.taskmanager.util.ManagerData;
+import com.dadc.taskmanager.util.ManagerDataRealm;
 import com.soundcloud.android.crop.Crop;
 
 import java.io.File;
@@ -75,11 +75,10 @@ public class TaskActivity extends AppCompatActivity {
         initToolBar();
         initView();
 
-
         Intent intent = getIntent();
-        ManagerData mManagerData = ManagerData.getInstance(this);
-        mDefaultTaskColor = mManagerData.getDateDefaultColor();
-        mMaxTimeTask = mManagerData.defaultTime();
+        ManagerDataRealm mManagerDataRealm = ManagerDataRealm.getInstance(this);
+        mDefaultTaskColor = mManagerDataRealm.getDateDefaultColor();
+        mMaxTimeTask = mManagerDataRealm.defaultTime();
         mImageHelper = new ImageHelper(this);
 
         //Get data from intent for edit item content
@@ -97,12 +96,12 @@ public class TaskActivity extends AppCompatActivity {
             mEditTextDescription.setText(mTaskEdit.getDescription());
             mPosition = getIntent().getIntExtra(KEY_POSITION_ITEM, -1);
             Bitmap bmp = BitmapFactory.decodeFile(mTaskEdit.getUrl());
-           if(bmp!=null) {
-               mImageViewAvatar.setImageBitmap(bmp);
-           }else{
-               mImageViewAvatar.setImageResource(R.drawable.no_avatar);
+            if (bmp != null) {
+                mImageViewAvatar.setImageBitmap(bmp);
+            } else {
+                mImageViewAvatar.setImageResource(R.drawable.no_avatar);
 
-           }
+            }
         }
 
         mButtonSetTime.setText(DateFormat.getTimeFormat(TaskActivity.this).format(new Date(mMaxTimeTask)));
@@ -183,8 +182,7 @@ public class TaskActivity extends AppCompatActivity {
 
     public Uri cropImage(Uri uri) {
 
-        String uuid = UUID.randomUUID().toString();
-        Uri destination = Uri.fromFile(new File(getCacheDir(), KEY_URI_CROP + uuid));
+        Uri destination = Uri.fromFile(new File(getCacheDir(), KEY_URI_CROP + getUUID()));
         Crop.of(uri, destination).asSquare().start(this);
         return destination;
     }
@@ -193,7 +191,7 @@ public class TaskActivity extends AppCompatActivity {
         Intent intent = new Intent();
 
         if (validateTitle() && validateDescription()) {
-            Task mTask = new Task(UUID.randomUUID().toString(), mTitle, mDescription, mDefaultTaskColor, 0, 0, mMaxTimeTask, ButtonType.PLAY.name(), pathImage);
+            Task mTask = new Task(getUUID(), mTitle, mDescription, mDefaultTaskColor, 0, 0, mMaxTimeTask, ButtonType.PLAY.name(), pathImage);
             intent.putExtra(KEY_POSITION_ITEM, mPosition);
             intent.putExtra(KEY_SUBMIT_TASK, mTask);
 
