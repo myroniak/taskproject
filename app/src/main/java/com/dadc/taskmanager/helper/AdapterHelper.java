@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.widget.ImageButton;
 
 import com.dadc.taskmanager.R;
@@ -36,19 +35,24 @@ public class AdapterHelper {
     private static final String KEY_POSITION = "position";
     private static final String KEY_ACTION = "action";
     private static final int REQUEST_CODE_TASK_EDIT = 2;
-    private TaskAdapter adapter;
-    private Context mContext;
+
+
     private ArrayList<Statistic> mStatisticArrayList;
     private ArrayList<Task> mTaskArrayList;
-    private int mStartTaskColor, mEndTaskColor, mDefaultTaskColor;
-    private PendingIntent mAlarmSender;
-    private AlarmManager mAlarmManager;
+
     private SwipeItemRecyclerMangerImpl mItemManger;
     private ManagerData mControlDataTask;
+    private PendingIntent mAlarmSender;
+    private AlarmManager mAlarmManager;
+    private TaskAdapter adapter;
+    private Context mContext;
+
+    private int mStartTaskColor, mEndTaskColor, mDefaultTaskColor;
 
     public AdapterHelper(ArrayList<Statistic> mStatisticArrayList, ArrayList<Task> mTaskArrayList, Context mContext,
                          int mStartTaskColor, int mEndTaskColor, int mDefaultTaskColor, AlarmManager mAlarmManager,
                          SwipeItemRecyclerMangerImpl mItemManger, ManagerData mControlDataTask, TaskAdapter adapter) {
+
         this.mStatisticArrayList = mStatisticArrayList;
         this.mTaskArrayList = mTaskArrayList;
         this.mContext = mContext;
@@ -65,29 +69,42 @@ public class AdapterHelper {
         return mTaskArrayList.get(position);
     }
 
-    public void stopDateTask(int position) {
+    // SPR - Start Pause Resume
+    public void buttonEventSPR(ButtonType mButtonType, int position) {
+        Task task = getItem(position);
 
-        getItem(position).setSelected(true);
-        getItem(position).setTaskColor(mEndTaskColor);
-        getItem(position).setStopDateTask(System.currentTimeMillis());
+        long differentTime = getItem(position).getPauseDifferent();
+        if (mButtonType == ButtonType.PAUSE) {
 
-        long time;
-        if (getItem(position).getPauseStop() != 0) {
-            time = getItem(position).getPauseDifferent();
+            mTaskArrayList.set(position, mControlDataTask.pauseTask(task));
+            if (getItem(position).getStartDateTask() == 0) {
+                setNotification(position, task.getMaxTime());
+                mTaskArrayList.set(position, mControlDataTask.startTask(task, mStartTaskColor));
+            }
 
-        } else {
-            time = getItem(position).getPauseDifferent() + (getItem(position).getStopDateTask() - getItem(position).getPauseStart());
+        } else if (mButtonType == ButtonType.RESUME) {
+
+            long pauseStart = task.getPauseStart();
+            long pauseStop = System.currentTimeMillis();
+
+            differentTime += different(pauseStart, pauseStop);
+            mTaskArrayList.set(position, mControlDataTask.resumeTask(task, differentTime, pauseStop));
         }
 
-        getItem(position).setButtonType(ButtonType.PLAY.name());
-        getItem(position).setPauseDifferent(time);
+        mControlDataTask.savePreferenceDataTask(mTaskArrayList);
+        notifyDataSetChanged();
+    }
+
+    public void stopDateTask(int position) {
+        Task task = getItem(position);
+        mTaskArrayList.set(position, mControlDataTask.stopTask(ButtonType.PLAY.name(), task, mEndTaskColor));
+
 
         /**
          * Add data to statistic
          * */
-        Task task = getItem(position);
         Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(getItem(position).getStartDateTask());
+        calendar.setTimeInMillis(task.getStartDateTask());
 
 
         int month = calendar.get(Calendar.MONTH) + 1;
@@ -102,31 +119,32 @@ public class AdapterHelper {
                     break;
                 } else {
                     mStatisticArrayList.add(new Statistic(task.getId(), task.getTitle(), month, task.getPauseDifferent()));
-
+                    break;
                 }
             }
         }
+        mControlDataTask.saveStatistic(mStatisticArrayList);
+
         /**
          * End set data to statistic
          * */
 
-        notifyDataSetChanged();
         mControlDataTask.savePreferenceDataTask(mTaskArrayList); //Save data in SharedPreferences
+        notifyDataSetChanged();
+
     }
 
     public void swipeResetTask(int position, SwipeLayout swipeLayout) {
         stopAlarmManager();
 
-        getItem(position).setTaskColor(mDefaultTaskColor);
-        getItem(position).setSelected(false);
-        getItem(position).setStopDateTask(0);
-        getItem(position).setStartDateTask(0);
+        Task task = getItem(position);
+        mTaskArrayList.set(position, mControlDataTask.swipeResetTask(task, mDefaultTaskColor));
 
         mItemManger.removeShownLayouts(swipeLayout);
         mItemManger.closeAllItems();
 
-        notifyDataSetChanged();
         mControlDataTask.savePreferenceDataTask(mTaskArrayList); //Save data in SharedPreferences
+        notifyDataSetChanged();
 
     }
 
@@ -134,15 +152,14 @@ public class AdapterHelper {
         stopAlarmManager();
         setNotification(position, getItem(position).getMaxTime());
 
-        getItem(position).setTaskColor(mStartTaskColor);
-        getItem(position).setSelected(true);
-        getItem(position).setStopDateTask(0);
+        Task task = getItem(position);
+        mTaskArrayList.set(position, mControlDataTask.swipeResetTaskEnd(task, mStartTaskColor));
 
         mItemManger.removeShownLayouts(swipeLayout);
         mItemManger.closeAllItems();
 
-        notifyDataSetChanged();
         mControlDataTask.savePreferenceDataTask(mTaskArrayList); //Save data in SharedPreferences
+        notifyDataSetChanged();
 
     }
 
@@ -153,15 +170,59 @@ public class AdapterHelper {
         intent.putExtra(KEY_POSITION_ITEM, position);
         intent.putExtra(KEY_TITLE_ACTIVITY, mContext.getResources().getString(R.string.activity_edit_task));
         ((AppCompatActivity) mContext).startActivityForResult(intent, REQUEST_CODE_TASK_EDIT);
+
         mItemManger.removeShownLayouts(swipeLayout);
         mItemManger.closeAllItems();
-        stopAlarmManager();
+    }
+
+    public void submitDrawable(ImageButton imageButton, int position) {
+        Task task = getItem(position);
+        switch (ButtonType.valueOf(getItem(position).getButtonType())) {
+
+            case PLAY:
+                imageButton.setImageResource(R.drawable.ic_pause_white_48dp);
+                mControlDataTask.updateEnum(ButtonType.PAUSE.name(), task);
+                break;
+
+            case PAUSE:
+                imageButton.setImageResource(R.drawable.ic_restore_white_48dp);
+                mControlDataTask.updateEnum(ButtonType.RESUME.name(), task);
+                break;
+
+            case RESUME:
+                imageButton.setImageResource(R.drawable.ic_pause_white_48dp);
+                mControlDataTask.updateEnum(ButtonType.PAUSE.name(), task);
+                break;
+            default:
+                break;
+        }
+        mTaskArrayList.set(position, task);
+        mControlDataTask.savePreferenceDataTask(mTaskArrayList);
+        notifyDataSetChanged();
     }
 
 
-    public void openSnackbar(SwipeLayout rv, CharSequence title) {
-        Snackbar.make(rv, title, Snackbar.LENGTH_SHORT).show();
+    public void updateDrawable(ImageButton imageButton, int position) {
+        ButtonType mButtonType = ButtonType.valueOf(getItem(position).getButtonType());
+        switch (mButtonType) {
+
+            case PLAY:
+                imageButton.setImageResource(R.drawable.ic_play_arrow_white_48dp);
+                break;
+
+            case PAUSE:
+                imageButton.setImageResource(R.drawable.ic_pause_white_48dp);
+                break;
+
+            case RESUME:
+                imageButton.setImageResource(R.drawable.ic_restore_white_48dp);
+                break;
+
+            default:
+                break;
+        }
     }
+
 
     public Intent intentToReceiver(String action, String title, int position) {
         Intent mIntent = new Intent(mContext, Receiver.class);
@@ -178,95 +239,21 @@ public class AdapterHelper {
         mAlarmManager.setExact(AlarmManager.RTC, System.currentTimeMillis() + timeMillis, mAlarmSender);
     }
 
+    public long different(long pauseStart, long pauseStop) {
+        return pauseStop - pauseStart;
+    }
+
+    public void notifyDataSetChanged() {
+        adapter.notifyDataSetChanged();
+    }
+
     public void stopAlarmManager() {
         if (mAlarmSender != null) {
             mAlarmManager.cancel(mAlarmSender);
         }
     }
 
-    public void buttonEvent(ButtonType mButtonType, int position) {
-
-        long differentTime = getItem(position).getPauseDifferent();
-        if (mButtonType == ButtonType.PAUSE) {
-
-            getItem(position).setPauseStart(0);
-            getItem(position).setPauseStop(0);
-
-            getItem(position).setPauseStart(System.currentTimeMillis());
-
-            if (getItem(position).getStartDateTask() == 0) {
-                setNotification(position, getItem(position).getMaxTime());
-
-                getItem(position).setSelected(true);
-                getItem(position).setTaskColor(mStartTaskColor);
-                getItem(position).setStartDateTask(System.currentTimeMillis());
-                getItem(position).setStopDateTask(0);
-
-                notifyDataSetChanged();
-                mControlDataTask.savePreferenceDataTask(mTaskArrayList); //Save data in SharedPreferences
-            }
-
-
-        } else if (mButtonType == ButtonType.RESUME) {
-            getItem(position).setPauseStop(System.currentTimeMillis());
-
-            long pauseStart = getItem(position).getPauseStart();
-            long pauseStop = System.currentTimeMillis();
-
-            differentTime += different(pauseStart, pauseStop);
-            getItem(position).setPauseDifferent(differentTime);
-
-        }
-
-    }
-
-    public long different(long pauseStart, long pauseStop) {
-        return pauseStop - pauseStart;
-    }
-
-    public void submitDrawable(ImageButton imageButton, int position) {
-
-        switch (ButtonType.valueOf(getItem(position).getButtonType())) {
-
-            case PLAY:
-                imageButton.setImageResource(R.drawable.ic_pause_white_48dp);
-                getItem(position).setButtonType(ButtonType.PAUSE.name());
-                break;
-
-            case PAUSE:
-                imageButton.setImageResource(R.drawable.ic_restore_white_48dp);
-                getItem(position).setButtonType(ButtonType.RESUME.name());
-                break;
-
-            case RESUME:
-                imageButton.setImageResource(R.drawable.ic_pause_white_48dp);
-                getItem(position).setButtonType(ButtonType.PAUSE.name());
-                break;
-            default:
-                break;
-        }
-    }
-
-    public void updateDrawable(ImageButton imageButton, int position) {
-        ButtonType mButtonType = ButtonType.valueOf(getItem(position).getButtonType());
-        switch (mButtonType) {
-            case PLAY:
-                imageButton.setImageResource(R.drawable.ic_play_arrow_white_48dp);
-                break;
-
-            case PAUSE:
-                imageButton.setImageResource(R.drawable.ic_pause_white_48dp);
-                break;
-
-            case RESUME:
-                imageButton.setImageResource(R.drawable.ic_restore_white_48dp);
-                break;
-            default:
-                break;
-        }
-    }
-
-    public void notifyDataSetChanged() {
-        adapter.notifyDataSetChanged();
+    public void openSnackbar(SwipeLayout rv, CharSequence title) {
+        Snackbar.make(rv, title, Snackbar.LENGTH_SHORT).show();
     }
 }

@@ -18,6 +18,7 @@ import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.format.DateFormat;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -77,9 +78,10 @@ public class TaskActivity extends AppCompatActivity {
 
 
         Intent intent = getIntent();
-        ManagerData controlDataTask = ManagerData.getInstance(this);
-        mDefaultTaskColor = controlDataTask.getDateDefaultColor();
-        mMaxTimeTask = controlDataTask.defaultTime();
+        ManagerData mManagerData = ManagerData.getInstance(this);
+       // ControlDataTask controlDataTask = new ControlDataTask(this);
+        mDefaultTaskColor = mManagerData.getDateDefaultColor();
+        mMaxTimeTask = mManagerData.defaultTime();
         mImageHelper = new ImageHelper(this);
 
         //Get data from intent for edit item content
@@ -101,6 +103,7 @@ public class TaskActivity extends AppCompatActivity {
                mImageViewAvatar.setImageBitmap(bmp);
            }else{
                mImageViewAvatar.setImageResource(R.drawable.no_avatar);
+
            }
         }
 
@@ -187,11 +190,12 @@ public class TaskActivity extends AppCompatActivity {
     }
 
     private void submitResult() {
+        Intent intent = new Intent();
 
         if (validateTitle() && validateDescription()) {
-            Task mTask = new Task(getUUID(), mTitle, mDescription, mDefaultTaskColor, 0, 0, mMaxTimeTask, ButtonType.PLAY.name(), pathImage);
+            Task mTask = new Task(UUID.randomUUID().toString(), mTitle, mDescription, mDefaultTaskColor, 0, 0, mMaxTimeTask, ButtonType.PLAY.name(), pathImage);
+            Log.d("myLog", "mid: " + getUUID());
 
-            Intent intent = new Intent();
             intent.putExtra(KEY_POSITION_ITEM, mPosition);
             intent.putExtra(KEY_SUBMIT_TASK, mTask);
 

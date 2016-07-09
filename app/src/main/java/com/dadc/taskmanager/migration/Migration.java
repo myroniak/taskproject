@@ -12,7 +12,6 @@ public class Migration implements RealmMigration {
 
         RealmSchema schema = realm.getSchema();
 
-
         if (oldVersion == 0) {
             schema.create("Task")
                     .addField("mId", String.class, FieldAttribute.PRIMARY_KEY)
@@ -23,6 +22,7 @@ public class Migration implements RealmMigration {
                     .addField("maxTime", Long.class)
                     .addField("mTaskColor", Integer.class)
                     .addField("isSelected", Boolean.class);
+
             oldVersion++;
         }
 
@@ -36,8 +36,15 @@ public class Migration implements RealmMigration {
 
         if (oldVersion == 2) {
             schema.get("Task")
-                    .addField("mUrl",String.class);
+                    .addField("mUrl", String.class);
+
+            schema.create("Statistic")
+                    .addField("mId", String.class, FieldAttribute.PRIMARY_KEY)
+                    .addField("mTitle", String.class)
+                    .addField("mMonth", Integer.class)
+                    .addField("mDifferentTime", Long.class);
             oldVersion++;
         }
+
     }
 }

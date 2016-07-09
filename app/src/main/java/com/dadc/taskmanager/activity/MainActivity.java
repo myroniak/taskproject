@@ -2,6 +2,7 @@ package com.dadc.taskmanager.activity;
 
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
@@ -13,6 +14,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -29,6 +31,7 @@ import com.dadc.taskmanager.model.Statistic;
 import com.dadc.taskmanager.model.Task;
 import com.dadc.taskmanager.util.ManagerData;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -48,13 +51,15 @@ public class MainActivity extends AppCompatActivity implements ClearDialogFragme
     private static final int REQUEST_CODE_TASK_EDIT = 2;
     private static final int REQUEST_CODE_SETTING = 3;
     private static Context sContext;
-    private ExpandableAdapter adapter;
-    private ManagerData mControlDataTask;
+    ExpandableAdapter adapter;
+    //   private ControlDataTask mControlDataTask;
 
     private FloatingActionButton mFloatingActionButton;
     private ArrayList<Task> mTaskArrayList;
     private RecyclerView mRecyclerView;
+    private ManagerData mManagerData;
     private ArrayList<Statistic> mStatisticArrayList, arrayList1, arrayList2, arrayList3, arrayList4, arrayList5, arrayList6, arrayList7, arrayList8, arrayList9, arrayList10, arrayList11, arrayList12;
+
     private TaskAdapter mTaskAdapter;
 
     private boolean mDoubleBackToExitPressedOnce = false;
@@ -72,7 +77,6 @@ public class MainActivity extends AppCompatActivity implements ClearDialogFragme
 
 
         TabHost tabHost = (TabHost) findViewById(R.id.tabHost);
-
         tabHost.setup();
 
         TabHost.TabSpec tabSpec = tabHost.newTabSpec("tag1");
@@ -94,8 +98,9 @@ public class MainActivity extends AppCompatActivity implements ClearDialogFragme
         } else {
             mTaskArrayList = new ArrayList<>();
         }
-        mControlDataTask = ManagerData.getInstance(this);
-        mDefaultTaskColor = mControlDataTask.getDateDefaultColor();
+        //mControlDataTask = new ControlDataTask(this);
+        mManagerData = ManagerData.getInstance(this);
+        mDefaultTaskColor = mManagerData.getDateDefaultColor();
 
         initView();
         initialize();
@@ -104,7 +109,7 @@ public class MainActivity extends AppCompatActivity implements ClearDialogFragme
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
-        mControlDataTask.loadCheckedItem(menu); //Load checkedItemSort from SharedPreferences
+        mManagerData.loadCheckedItem(menu); //Load checkedItemSort from SharedPreferences
         return true;
     }
 
@@ -170,8 +175,8 @@ public class MainActivity extends AppCompatActivity implements ClearDialogFragme
         if (resultCode == RESULT_OK && requestCode == REQUEST_CODE_SETTING) {
 
             //Update color
-            mDefaultTaskColor = mControlDataTask.getDateDefaultColor();
-            mControlDataTask.updateColorDateTask();
+            mDefaultTaskColor = mManagerData.getDateDefaultColor();
+            mManagerData.updateColorDateTask();
 
         } else if (resultCode == RESULT_OK && intent != null) {
 
@@ -181,7 +186,9 @@ public class MainActivity extends AppCompatActivity implements ClearDialogFragme
             switch (requestCode) {
 
                 case REQUEST_CODE_TASK:
+                    //     Task myTask5 = intent.getParcelableExtra(KEY_SUBMIT_TASK);
                     mTaskArrayList.add(0, myTask);
+                    Log.d("myLog", "id:" + myTask.getId());
 
                     break;
 
@@ -194,10 +201,11 @@ public class MainActivity extends AppCompatActivity implements ClearDialogFragme
             }
 
         }
-
+        mManagerData.savePreferenceDataTask(mTaskArrayList); //Save data in SharedPreferences
         mTaskAdapter.notifyDataSetChanged();
-        mControlDataTask.savePreferenceDataTask(mTaskArrayList); //Save data in SharedPreferences
 
+        //    mManagerData.toRealm(mTaskArrayList); //Save data in SharedPreferences
+//        mManagerData.addToRealm(mTaskArrayList); //Save data in SharedPreferences
 
     }
 
@@ -225,7 +233,7 @@ public class MainActivity extends AppCompatActivity implements ClearDialogFragme
 
     @Override
     public void clearTaskList() {
-        mControlDataTask.deleteAllRealm(mTaskArrayList, mTaskAdapter);
+        mManagerData.deleteAllRealm(mTaskArrayList, mTaskAdapter);
     }
 
 
@@ -252,7 +260,7 @@ public class MainActivity extends AppCompatActivity implements ClearDialogFragme
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                mTaskArrayList = mControlDataTask.loadPreferenceDataTask();
+                mTaskArrayList = mManagerData.loadPreferenceDataTask();
                 mTaskAdapter = new TaskAdapter(MainActivity.this, mTaskArrayList, mStatisticArrayList);
                 mRecyclerView.setAdapter(mTaskAdapter);
             }
@@ -278,11 +286,13 @@ public class MainActivity extends AppCompatActivity implements ClearDialogFragme
     //Calculation height item ListView
     private void addManyTasks() {
         if (mTaskArrayList.size() == 0) {
-
+            Uri uri = Uri.parse("R.drawable.no_avatar");
+            File file = new File(uri.getPath());
+            Log.d("myLog", "filel: " + file.toString());
             mTaskArrayList.add(0, new Task(getUUID(), getResources().getString(R.string.title_task) + 1,
                     getResources().getString(R.string.description_task) + 1,
 
-                    mDefaultTaskColor, 0, 0, mControlDataTask.defaultTime(), ButtonType.PLAY.name(), ""));
+                    mDefaultTaskColor, 0, 0, mManagerData.defaultTime(), ButtonType.PLAY.name(), file.toString()));
 
             mTaskAdapter.notifyDataSetChanged();
         }
@@ -300,20 +310,19 @@ public class MainActivity extends AppCompatActivity implements ClearDialogFragme
                     int randomNumber = random.nextInt((100 - 2) + 2) + 2;
                     mTaskArrayList.add(0, new Task(getUUID(), getResources().getString(R.string.title_task) +
                             randomNumber, getResources().getString(R.string.description_task) + randomNumber,
-                            mDefaultTaskColor, 0, 0, mControlDataTask.defaultTime(), ButtonType.PLAY.name(), ""));
+                            mDefaultTaskColor, 0, 0, mManagerData.defaultTime(), ButtonType.PLAY.name(), ""));
                 }
-
                 mTaskAdapter.notifyDataSetChanged();
-                mControlDataTask.savePreferenceDataTask(mTaskArrayList); //Save data in SharedPreferences
+                mManagerData.savePreferenceDataTask(mTaskArrayList); //Save data in SharedPreferences
             }
         }, 10);
     }
 
     private void saveSortTask(MenuItem item) {
         item.setChecked(true);
-        mControlDataTask.saveCheckedItem(item); //Save checkedItem in SharedPreferences
+        mManagerData.saveCheckedItem(item); //Save checkedItem in SharedPreferences
         mTaskAdapter.notifyDataSetChanged();
-        mControlDataTask.savePreferenceDataTask(mTaskArrayList);  //Save data in SharedPreferences
+        mManagerData.savePreferenceDataTask(mTaskArrayList);  //Save data in SharedPreferences
     }
 
     private String getUUID() {
@@ -333,6 +342,7 @@ public class MainActivity extends AppCompatActivity implements ClearDialogFragme
     }
 
     public void realmConfiguration() {
+
         RealmConfiguration mRealmConfiguration = new RealmConfiguration.Builder(this)
                 .schemaVersion(3)
                 .migration(new Migration())
@@ -352,7 +362,7 @@ public class MainActivity extends AppCompatActivity implements ClearDialogFragme
     public void initialize() {
 
         сhildDataList = new HashMap<>();
-        mStatisticArrayList = new ArrayList<>();
+        mStatisticArrayList = mManagerData.loadStatistic();
 
         mGroupsArray.add("Січень");
         mGroupsArray.add("Лютий");
@@ -379,7 +389,9 @@ public class MainActivity extends AppCompatActivity implements ClearDialogFragme
         arrayList10 = new ArrayList<>();
         arrayList11 = new ArrayList<>();
         arrayList12 = new ArrayList<>();
+
         refresh();
+
         adapter = new ExpandableAdapter(this, mGroupsArray, сhildDataList);
 
         expandableListView = (ExpandableListView) findViewById(R.id.expListView);
@@ -444,18 +456,18 @@ public class MainActivity extends AppCompatActivity implements ClearDialogFragme
 
         }
 
-            сhildDataList.put(mGroupsArray.get(0), arrayList1);
-            сhildDataList.put(mGroupsArray.get(1), arrayList2);
-            сhildDataList.put(mGroupsArray.get(2), arrayList3);
-            сhildDataList.put(mGroupsArray.get(3), arrayList4);
-            сhildDataList.put(mGroupsArray.get(4), arrayList5);
-            сhildDataList.put(mGroupsArray.get(5), arrayList6);
-            сhildDataList.put(mGroupsArray.get(6), arrayList7);
-            сhildDataList.put(mGroupsArray.get(7), arrayList8);
-            сhildDataList.put(mGroupsArray.get(8), arrayList9);
-            сhildDataList.put(mGroupsArray.get(9), arrayList10);
-            сhildDataList.put(mGroupsArray.get(10), arrayList11);
-            сhildDataList.put(mGroupsArray.get(11), arrayList12);
+        сhildDataList.put(mGroupsArray.get(0), arrayList1);
+        сhildDataList.put(mGroupsArray.get(1), arrayList2);
+        сhildDataList.put(mGroupsArray.get(2), arrayList3);
+        сhildDataList.put(mGroupsArray.get(3), arrayList4);
+        сhildDataList.put(mGroupsArray.get(4), arrayList5);
+        сhildDataList.put(mGroupsArray.get(5), arrayList6);
+        сhildDataList.put(mGroupsArray.get(6), arrayList7);
+        сhildDataList.put(mGroupsArray.get(7), arrayList8);
+        сhildDataList.put(mGroupsArray.get(8), arrayList9);
+        сhildDataList.put(mGroupsArray.get(9), arrayList10);
+        сhildDataList.put(mGroupsArray.get(10), arrayList11);
+        сhildDataList.put(mGroupsArray.get(11), arrayList12);
 
 
     }

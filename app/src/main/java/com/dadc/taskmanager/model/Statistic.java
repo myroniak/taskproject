@@ -3,15 +3,22 @@ package com.dadc.taskmanager.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import io.realm.RealmObject;
+import io.realm.annotations.PrimaryKey;
+
 /**
  * Created by bomko on 03.07.16.
  */
-public class Statistic implements Parcelable {
-
+public class Statistic extends RealmObject implements Parcelable {
+    @PrimaryKey
     private String mId;
     private String mTitle;
     private int mMonth;
     private long mDifferentTime;
+
+    public Statistic() {
+
+    }
 
     public Statistic(String mId, String mTitle, int mMonth, long mDifferentTime) {
         this.mId = mId;

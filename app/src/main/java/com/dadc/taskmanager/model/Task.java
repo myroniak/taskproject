@@ -17,6 +17,7 @@ public class Task extends RealmObject implements Parcelable, Comparable<Task> {
 
     @PrimaryKey
     private String mId;
+
     private String mTitle;
     private String mDescription;
     private String mUrl;
@@ -167,7 +168,7 @@ public class Task extends RealmObject implements Parcelable, Comparable<Task> {
 
 
     protected Task(Parcel in) {
-
+        mId = in.readString();
         mTitle = in.readString();
         mDescription = in.readString();
         mTaskColor = in.readInt();
@@ -186,6 +187,7 @@ public class Task extends RealmObject implements Parcelable, Comparable<Task> {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(mId);
         dest.writeString(mTitle);
         dest.writeString(mDescription);
         dest.writeInt(mTaskColor);
