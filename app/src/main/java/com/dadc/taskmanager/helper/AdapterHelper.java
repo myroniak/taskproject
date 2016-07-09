@@ -101,7 +101,7 @@ public class AdapterHelper {
 
 
         /**
-         * Add data to statistic
+         * Add or set data to statistic
          * */
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(task.getStartDateTask());
@@ -114,8 +114,7 @@ public class AdapterHelper {
         } else {
             for (int i = 0; i < mStatisticArrayList.size(); i++) {
                 if (mStatisticArrayList.get(i).getId().contains(task.getId())) {
-
-                    mStatisticArrayList.get(i).setDifferentTime(mStatisticArrayList.get(i).getDifferentTime() + task.getPauseDifferent());
+                    mStatisticArrayList.set(i, mControlDataTask.diffStatistic(mStatisticArrayList.get(i), mStatisticArrayList.get(i).getDifferentTime() + task.getPauseDifferent()));
                     break;
                 } else {
                     mStatisticArrayList.add(new Statistic(task.getId(), task.getTitle(), month, task.getPauseDifferent()));
@@ -126,7 +125,7 @@ public class AdapterHelper {
         mControlDataTask.saveStatistic(mStatisticArrayList);
 
         /**
-         * End set data to statistic
+         * End add or set data to statistic
          * */
 
         mControlDataTask.savePreferenceDataTask(mTaskArrayList); //Save data in SharedPreferences

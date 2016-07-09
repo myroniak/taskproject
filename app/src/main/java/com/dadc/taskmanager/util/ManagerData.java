@@ -70,6 +70,13 @@ public class ManagerData {
         return taskArrayList;
     }
 
+    public Statistic diffStatistic(Statistic statistic, long diffTime) {
+        mRealm.beginTransaction();
+        Statistic taskUpdate = mRealm.where(Statistic.class).equalTo("mId", statistic.getId()).findFirst();
+        taskUpdate.setDifferentTime(diffTime);
+        mRealm.commitTransaction();
+        return taskUpdate;
+    }
 
     public void savePreferenceDataTask(ArrayList<Task> arrayList) {
         mRealm.beginTransaction();
